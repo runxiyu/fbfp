@@ -8,19 +8,20 @@
 	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
 	<style>
 	.tp-columns {
-	        display: flex;
-	        flex-direction: row;
-	        @media(max-width: 40rem) {
-	                flex-wrap: wrap;
-	        }
-	        gap: 1rem;
+		display: flex;
+		flex-direction: row;
+		@media(max-width: 40rem) {
+			flex-wrap: wrap;
+		}
+		gap: 1rem;
+		align-items: stretch;
 	}
 	
 	.tp-columns div {
-	        min-width: 15em;
-	        max-width: 40rem;
-	        width: 100%;
-	        margin: auto;
+		min-width: 15em;
+		max-width: 40rem;
+		width: 100%;
+		margin: auto;
 	}
 	</style>
 </head>
@@ -38,9 +39,45 @@
 <main class="tp-columns">
 	<div id="yours">
 		<h2>Your work</h2>
+		{% if wyours %}
+		<table>
+			<tr>
+				<th class="min" scope="col">ID</th>
+				<th class="min" scope="col">Public?</th>
+				<th scope="col">Title</th>
+			</tr>
+			{% for w in wyours %}
+			<tr>
+				<td class="min">{{ w.wid }}</td>
+				<td class="min">{{ w.public }}</td>
+				<td>{{ w.title }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		{% endif %}
 	</div>
 	<div id="others">
 		<h2>Other people's work</h2>
+		{% if wothers %}
+		<table>
+			<tr>
+				<th class="min" scope="col">ID</th>
+				<th class="min" scope="col">Author</th>
+				<th scope="col">Title</th>
+			</tr>
+			{% for w in wothers %}
+			<tr>
+				<td class="min">{{ w.wid }}</td>
+				{% if w.author %}
+				<td class="min">{{ w.author.name }}</td>
+				{% else %}
+				<td class="min" class="anonymous">Anonymous</td>
+				{% endif %}
+				<td>{{ w.title }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		{% endif %}
 	</div>
 </main>
 </body>

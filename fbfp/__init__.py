@@ -4,6 +4,7 @@
 # Upstream: https://git.sr.ht/~runxiyu/fbfp
 
 from __future__ import annotations
+from dataclasses import dataclass
 import typing
 import time
 import os
@@ -17,6 +18,7 @@ import datetime
 import zoneinfo
 import functools
 
+import jinja2
 import flask
 import werkzeug
 import werkzeug.security
@@ -84,7 +86,9 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     def index(context: context_t) -> response_t:
         user = ensure_user(context)
         return flask.Response(
-            flask.render_template("index.html", user=user, fbfpc=fbfpc())
+            flask.render_template(
+                "index.html", user=user, fbfpc=fbfpc(), wyours=None, wothers=None
+            )
         )
 
     @bp.route("/static/<path:filename>", methods=["GET"])
@@ -105,6 +109,7 @@ def make_app(login_required: login_required_t, **config: typing.Any) -> flask.Ap
     )
     app.register_blueprint(make_bp(login_required), url_prefix="/")
     app.config.update(**config)
+    app.jinja_env.undefined = jinja2.StrictUndefined
     db.init_app(app)
     with app.app_context():
         db.create_all()

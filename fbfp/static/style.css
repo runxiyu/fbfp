@@ -101,11 +101,11 @@ th {
 
 th[scope~="row"] {
 	width: 6em;
-	text-align: right;
+	/* text-align: right; */
 }
 
 th[scope~="col"] {
-	text-align: left;
+	/* text-align: left; */
 }
 
 td {
@@ -115,6 +115,12 @@ td {
 	height: 1.25rem;
 	border: 1px solid var(--border);
 	padding: 3px 5px;
+}
+
+td.min {
+	width: 0;
+	min-width: fit-content;
+	white-space: nowrap;
 }
 
 tr:nth-child(even) td {
@@ -171,3 +177,4 @@ form:not([class="plain"]) textarea {
 form:not([class="plain"]) button {
 	margin-left: 0.5em;
 }
+
