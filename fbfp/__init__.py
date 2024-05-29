@@ -39,11 +39,10 @@ def no_login_required(
 ) -> typing.Callable[[], response_t]:
     @functools.wraps(f)
     def wrapper() -> response_t:
-        context = {"name": "Test User"}
+        context = {"user": {"name": "Test User 测试用户", "preferred_username": "test@example.org", "oid": "00000000-0000-0000-0000-000000000000"}}
         return f(context)
 
     return wrapper
-
 
 def make_bp(login_required: login_required_t) -> flask.Blueprint:
     bp = flask.Blueprint("fbfp", __name__, url_prefix="/", template_folder="templates")
@@ -72,4 +71,4 @@ def make_debug_app() -> flask.App:
 
 
 if __name__ == "__main__":
-    make_debug_app().run(port=8080, debug=True)
+    make_debug_app().run(port=5000, debug=True)
