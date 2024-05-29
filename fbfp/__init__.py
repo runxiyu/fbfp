@@ -53,10 +53,12 @@ def make_app(login_required: login_required_t) -> flask.App:
     app.register_blueprint(make_bp(login_required), url_prefix="/")
     return app
 
+
 def make_debug_app() -> flask.App:
-    app = make_app(login_required = lambda i:i)
+    app = make_app(login_required=lambda i: i)
     assert app.config["DEBUG"] == True
     return app
+
 
 if __name__ == "__main__":
     make_debug_app().run(port=8080, debug=True)
