@@ -22,10 +22,10 @@ import werkzeug
 import werkzeug.security
 import werkzeug.middleware.proxy_fix
 
+context_t = typing.Optional[dict[str, typing.Any]]
 response_t: typing.TypeAlias = typing.Union[werkzeug.Response, flask.Response, str]
-login_required_argument_t: typing.TypeAlias = typing.Callable[[], response_t]
 login_required_t: typing.TypeAlias = typing.Callable[
-    [login_required_argument_t], login_required_argument_t
+    [typing.Callable[[context_t], response_t]], typing.Callable[[], response_t]
 ]
 
 VERSION = """fbfp v0.1
@@ -34,12 +34,23 @@ License: GNU Affero General Public License v3.0 or later
 URL: https://sr.ht/~runxiyu/fbfp"""
 
 
+def no_login_required(
+    f: typing.Callable[[context_t], response_t]
+) -> typing.Callable[[], response_t]:
+    @functools.wraps(f)
+    def wrapper() -> response_t:
+        context = {"name": "Test User"}
+        return f(context)
+
+    return wrapper
+
+
 def make_bp(login_required: login_required_t) -> flask.Blueprint:
     bp = flask.Blueprint("fbfp", __name__, url_prefix="/", template_folder="templates")
 
     @bp.route("/", methods=["GET"])
     @login_required
-    def index() -> response_t:
+    def index(context: context_t) -> response_t:
         return flask.Response(flask.render_template("index.html"))
 
     return bp
@@ -55,7 +66,7 @@ def make_app(login_required: login_required_t) -> flask.App:
 
 
 def make_debug_app() -> flask.App:
-    app = make_app(login_required=lambda i: i)
+    app = make_app(login_required=no_login_required)
     assert app.config["DEBUG"] == True
     return app
 
