@@ -1,5 +1,5 @@
 :root {
-	--primary: #0062cc;
+	--theme: #0062cc;
 	--border: rgb(180, 180, 180);
 	--boxbg: rgb(235, 235, 235);
 	--rowbg-even: #ffffff;
@@ -9,7 +9,7 @@
 html {
 	font-family: system-ui, sans-serif;
 	line-height: 1.2;
-	border-color: var(--primary);
+	border-color: var(--theme);
 	color: black;
 	background-color: white;
 }
@@ -33,7 +33,7 @@ hr {
 }
 
 a {
-	color: var(--primary);
+	color: var(--theme);
 	text-decoration: none;
 }
 
@@ -47,7 +47,7 @@ header {
 	top: 0;
 	left: 0;
 	color: white;
-	background-color: var(--primary);
+	background-color: var(--theme);
 	z-index: 1000;
 	width: 100%;
 }
@@ -125,16 +125,6 @@ tr:nth-child(odd) td {
   background-color: var(--rowbg-odd);
 }
 
-.calendar-row {
-	vertical-align: top;
-	height: 6em;
-}
-
-.month {
-	color: var(--primary);
-	font-weight: bold;
-}
-
 form:not([class="plain"]) {
 	margin-top: 0.4em;
 	margin-bottom: 0.4em;
@@ -170,7 +160,7 @@ form:not([class="plain"]) input:not([type="submit"]), textarea {
 }
 
 form:not([class="plain"]) input:focus, textarea:focus {
-	border-color: var(--primary);
+	border-color: var(--theme);
 }
 
 form:not([class="plain"]) textarea {

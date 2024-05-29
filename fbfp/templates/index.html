@@ -1,24 +1,47 @@
-{# This comment makes vim detect the filetype correctly #}
 <!DOCTYPE html>
+{# This comment makes vim detect the filetype correctly #}
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FBFP</title>
-<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>FBFP</title>
+	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
+	<style>
+	.tp-columns {
+	        display: flex;
+	        flex-direction: row;
+	        @media(max-width: 40rem) {
+	                flex-wrap: wrap;
+	        }
+	        gap: 1rem;
+	}
+	
+	.tp-columns div {
+	        min-width: 15em;
+	        max-width: 40rem;
+	        width: 100%;
+	        margin: auto;
+	}
+	</style>
 </head>
 <body>
-	<header>
-		<div class="header-content">
-			<div class="header-left">
-				<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
-			</div>
-			<div class="header-right">
-				<p><a href="{{ url_for(".me") }}">{{ user.name }}</a></p>
-			</div>
+<header>
+	<div class="header-content">
+		<div class="header-left">
+			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
 		</div>
-	</header>
-	<main>
-	</main>
+		<div class="header-right">
+			<p><a href="{{ url_for(".me") }}">{{ user.name }}</a></p>
+		</div>
+	</div>
+</header>
+<main class="tp-columns">
+	<div id="yours">
+		<h2>Your work</h2>
+	</div>
+	<div id="others">
+		<h2>Other people's work</h2>
+	</div>
+</main>
 </body>
 </html>
