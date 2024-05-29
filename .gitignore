@@ -2,3 +2,5 @@ __pycache__/
 fbfp.egg-info
 venv
 build
+COMMIT_EDITMSG
+instance

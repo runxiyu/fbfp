@@ -1,0 +1,183 @@
+:root {
+	--primary: #0062cc;
+	--border: rgb(180, 180, 180);
+	--boxbg: rgb(235, 235, 235);
+	--rowbg-even: #ffffff;
+	--rowbg-odd: #fcfcfc;
+}
+
+html {
+	font-family: system-ui, sans-serif;
+	line-height: 1.2;
+	border-color: var(--primary);
+	color: black;
+	background-color: white;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+}
+
+main {
+	padding-left: 1rem;
+	padding-right: 1rem;
+	margin: 1rem auto;
+	max-width: 60rem;
+}
+
+hr {
+	background-color: black;
+	border-width: 0;
+	height: 1px;
+}
+
+a {
+	color: var(--primary);
+	text-decoration: none;
+}
+
+h2, h3, h4, h5, h6 {
+	margin-top: 1.2rem;
+}
+
+header {
+	position: -webkit-sticky;
+	position: sticky;
+	top: 0;
+	left: 0;
+	color: white;
+	background-color: var(--primary);
+	z-index: 1000;
+	width: 100%;
+}
+
+.header-content {
+	padding-left: 1em;
+	padding-right: 1em;
+	max-width: 60rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0 auto;
+}
+
+header img {
+	vertical-align: middle;
+	max-height: 40px;
+}
+
+header a {
+	color: white;
+}
+
+header h1 {
+	font-size: 25px;
+}
+
+#snotes {
+	margin-top: 0.4em;
+	margin-bottom: 0.4em;
+	padding: 0.4em;
+	border: 1px solid #ccc;
+	border-radius: 0.4em;
+	font-size: 90%;
+}
+
+table {
+	margin-top: 0.4em;
+	margin-bottom: 0.4em;
+	width: 100%;
+	border-collapse: collapse;
+	border: 2px solid var(--border);
+	font-size: 90%;
+}
+
+th {
+	background-color: var(--boxbg);
+	border: 1px solid var(--border);
+	padding: 3px 5px;
+}
+
+th[scope~="row"] {
+	width: 6em;
+	text-align: right;
+}
+
+th[scope~="col"] {
+	text-align: left;
+}
+
+td {
+	border: 1px solid;
+	text-align: left;
+	padding: 0px 3.0.4em;
+	height: 1.25rem;
+	border: 1px solid var(--border);
+	padding: 3px 5px;
+}
+
+tr:nth-child(even) td {
+  background-color: var(--rowbg-even);
+}
+
+tr:nth-child(odd) td {
+  background-color: var(--rowbg-odd);
+}
+
+.calendar-row {
+	vertical-align: top;
+	height: 6em;
+}
+
+.month {
+	color: var(--primary);
+	font-weight: bold;
+}
+
+form:not([class="plain"]) {
+	margin-top: 0.4em;
+	margin-bottom: 0.4em;
+	padding: 0.4em;
+	border: 1px solid #ccc;
+	border-radius: 0.4em;
+	font-size: 90%;
+}
+
+form:not([class="plain"]) ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+form:not([class="plain"]) li + li {
+	margin-top: 0.2em;
+}
+
+form:not([class="plain"]) label {
+	display: inline-block;
+	width: 6em;
+	text-align: right;
+	font-weight: bold;
+}
+
+form:not([class="plain"]) input:not([type="submit"]), textarea {
+	font: 1em sans-serif;
+	width: auto;
+	max-width: 75%;
+	box-sizing: border-box;
+	border: 1px solid #999;
+}
+
+form:not([class="plain"]) input:focus, textarea:focus {
+	border-color: var(--primary);
+}
+
+form:not([class="plain"]) textarea {
+	vertical-align: top;
+	height: 3em;
+}
+
+form:not([class="plain"]) button {
+	margin-left: 0.5em;
+}
