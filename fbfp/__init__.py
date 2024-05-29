@@ -22,6 +22,8 @@ import werkzeug
 import werkzeug.security
 import werkzeug.middleware.proxy_fix
 
+from . import database
+
 context_t = typing.Optional[dict[str, typing.Any]]
 response_t: typing.TypeAlias = typing.Union[werkzeug.Response, flask.Response, str]
 login_required_t: typing.TypeAlias = typing.Callable[
@@ -74,6 +76,8 @@ def make_app(login_required: login_required_t) -> flask.App:
 def make_debug_app() -> flask.App:
     app = make_app(login_required=no_login_required)
     assert app.config["DEBUG"] == True
+    if not app.config.get("SQLALCHEMY_URL"):
+        app.config["SQLALCHEMY_URL"] = "sqlite://test.db"
     return app
 
 

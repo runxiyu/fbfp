@@ -1,0 +1,11 @@
+[project]
+name = "fbfp"
+# version = "0.0.0"
+dynamic = ["version"]
+requires-python = ">= 3.11"
+dependencies = [
+    "flask",
+    "sqlalchemy[mypy] >= 2.0.0",
+]
+
+# vim: expandtab tabstop=4
