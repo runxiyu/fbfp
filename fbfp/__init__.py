@@ -98,9 +98,8 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     @login_required
     def index(context: context_t) -> response_t:
         user = ensure_user(context)
-        # TODO: More Mypy errors below
-        wyours = list(db.session.query(models.Work).filter(models.Work.user == user))  # type: ignore
-        wothers = list(db.session.query(models.Work).filter(models.Work.user != user))  # type: ignore
+        wyours = user.works
+        wothers = list(db.session.query(models.Work).filter(models.Work.user != user))  # type: ignore # FIXME
         return flask.Response(
             flask.render_template(
                 "index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
@@ -137,8 +136,24 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         user = ensure_user(context)
         if not (target := db.session.get(models.User, oid)):
             raise nope(404, "I don't know a user with the OID of %s" % oid)
-        return {"oid": target.oid, "email": target.email, "name": target.name}
-        # raise nope(501, "/user not implemented")
+        return {
+            "oid": target.oid,
+            "email": target.email,
+            "name": target.name,
+            "works": [
+                {
+                    "wid": w.wid,
+                    "title": w.title,
+                    "text": w.text,
+                    "filename": w.filename,
+                    "anonymous": w.anonymous,
+                    "public": w.public,
+                    "active": w.active,
+                }
+                for w in target.works
+                if w.public  # TODO: Not sure if this is efficient
+            ],
+        }
 
     # Not authenticated because filename is partially random
     @bp.route("/file/<filename>", methods=["GET"])
