@@ -55,6 +55,7 @@
 				<td>None</td>
 				{% endif %}
 			</tr>
+			{% if work.user.oid == user.oid %}
 			<tr>
 				<td class="th-like" colspan=2>
 						<div class="flex-justify">
@@ -67,6 +68,7 @@
 						</div>
 				</td>
 			</tr>
+			{% endif %}
 		</table>
 	</form>
 	{% if not work.text %}
