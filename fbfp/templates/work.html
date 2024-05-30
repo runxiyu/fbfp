@@ -54,7 +54,7 @@
 		</table>
 	</form>
 	<div id="main-actions">
-		<a class="btn btn-normal" href="{{ url_for(".work_comment", id=work.id) }}">Create a whole-work comment</a>
+		<a class="btn btn-normal" href="{{ url_for(".work_comment_new", id=work.id) }}">Create a whole-work comment</a>
 	</div>
 	{% if not work.text %}
 	<p>

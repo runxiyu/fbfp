@@ -203,17 +203,81 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             flask.flash("Deleted #%d" % id)
             return flask.redirect(flask.url_for(".index"))
 
-    @bp.route("/work/<int:id>/comment")  # type: ignore # FIXME
+    @bp.route("/work/<int:id>/comment/new", methods=["GET", "POST"])  # type: ignore # FIXME
     @login_required
-    def work_comment(context: context_t, id: int) -> response_t:
+    def work_comment_new(context: context_t, id: int) -> response_t:
         user = ensure_user(context)
         if (not (work := db.session.get(models.Work, id))) or (
             (not work.public) and (work.user is not user)
         ):
             raise nope(404, "Submission %d does not exist or is private" % id)
-        if flask.request.method == "POST":
-            return flask.request.form
-        return flask.Response(flask.render_template("work_comment.html", user=user, fbfpc=fbfpc(), work=work))
+        if flask.request.method == "GET":
+            return flask.Response(flask.render_template("work_comment_new.html", user=user, fbfpc=fbfpc(), work=work))
+
+        form_file = flask.request.files["file"]
+        if filename := form_file.filename:
+            if (
+                shutil.disk_usage(fbfpc()["upload_path"]).free
+                < fbfpc()["require_free_space"]
+            ):
+                raise nope(
+                    500,
+                    "The server does not have enough free space to safely store uploads.",
+                )
+            filename_base, filename_ext = os.path.splitext(os.path.basename(filename))
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                suffix=filename_ext,
+                prefix=filename_base + ".",
+                dir=fbfpc()["upload_path"],
+                delete=False,
+            ) as fd:
+                local_filename = fd.name
+                form_file.save(local_filename)
+        else:
+            local_filename = None
+
+        text: typing.Optional[str]
+
+        try:
+            title = flask.request.form["title"]
+            text = flask.request.form["text"]
+        except KeyError as e:
+            raise nope(400, "Form does not include %s" % e.args[0])
+
+        if not title.strip():
+            raise nope(400, "You didn't include a title.")
+
+        if not (text.strip()):
+            if not local_filename:
+                raise nope(
+                    400,
+                    "Your comment is basically empty. You need to upload a file or insert some text.",
+                )
+            text = None
+
+        anonymous = flask.request.form.get("anonymous", None) != None
+        public = flask.request.form.get("public", None) != None
+
+        comment = models.WholeWorkComment(
+            user=user,
+            title=title,
+            work=work,
+            text=text,
+            anonymous=anonymous,
+            public=public,
+            filename=os.path.basename(local_filename) if local_filename else None,
+        )
+
+        db.session.add(comment)
+        db.session.flush()
+        db.session.refresh(comment)
+        db.session.commit()
+
+        id = comment.id
+        assert type(id) is int
+
+        return flask.redirect(flask.url_for(".work_comment", id=id))
                 
 
     @bp.route("/list", methods=["GET", "POST"])

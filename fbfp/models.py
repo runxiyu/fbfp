@@ -12,6 +12,7 @@ class User(database.db.Model):  # type: ignore
     can_submit = mapped_column(Boolean, unique=False)
     can_feedback = mapped_column(Boolean, unique=False)
     works: Mapped[List["Work"]] = relationship(back_populates="user")
+    whole_work_comments: Mapped[List["WholeWorkComment"]] = relationship(back_populates="user")
 
     def __init__(
         self,
@@ -80,3 +81,28 @@ class WholeWorkComment(database.db.Model):  # type: ignore
     public = mapped_column(Boolean, unique=False)
     filename = mapped_column(String(255), unique=True)
     text = mapped_column(String, unique=False)
+    oid = mapped_column(ForeignKey("fbfp_users.oid"))
+    user: Mapped["User"] = relationship(back_populates="whole_work_comments")
+
+    def __init__(
+        self,
+        user: User,
+        title: str,
+        work: Work,
+        text: Optional[str],
+        filename: Optional[str],
+        anonymous: bool,
+        public: bool,
+    ) -> None:
+        self.user = user
+        self.title = title
+        self.work = work
+        if text:
+            self.text = text
+        else:
+            self.text = None
+        if filename:
+            self.filename = filename
+        else:
+            self.filename = None
+        self.anonymous, self.public = anonymous, public
