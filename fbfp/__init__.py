@@ -120,14 +120,14 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
 
     # FIXME: Typing is broken because of how I typed login_required
     #        https://todo.sr.ht/~runxiyu/fbfp/6
-    @bp.route("/work/<int:wid>", methods=["GET", "POST"])  # type: ignore
+    @bp.route("/work/<int:id>", methods=["GET", "POST"])  # type: ignore
     @login_required
-    def work(context: context_t, wid: int) -> response_t:
+    def work(context: context_t, id: int) -> response_t:
         user = ensure_user(context)
-        if (not (work := db.session.get(models.Work, wid))) or (
+        if (not (work := db.session.get(models.Work, id))) or (
             (not work.public) and (work.user is not user)
         ):
-            raise nope(404, "Submission %d does not exist or is private" % wid)
+            raise nope(404, "Submission %d does not exist or is private" % id)
         if flask.request.method == "POST":
             if work.user is not user:
                 raise nope(403, "You are not authorized to update another user's work.")
@@ -162,7 +162,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             "name": target.name,
             "works": [
                 {
-                    "wid": w.wid,
+                    "id": w.id,
                     "title": w.title,
                     "text": w.text,
                     "filename": w.filename,
@@ -251,10 +251,10 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         db.session.refresh(work)
         db.session.commit()
 
-        wid = work.wid
-        assert type(wid) is int
+        id = work.id
+        assert type(id) is int
 
-        return flask.redirect(flask.url_for(".work", wid=wid))
+        return flask.redirect(flask.url_for(".work", id=id))
 
     return bp
 

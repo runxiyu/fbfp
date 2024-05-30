@@ -33,7 +33,7 @@ class User(database.db.Model):  # type: ignore
 
 class Work(database.db.Model):  # type: ignore
     __tablename__ = "fbfp_works"
-    wid = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
     title = mapped_column(String(255), unique=False)
     text = mapped_column(String, unique=False)
     filename = mapped_column(String(255), unique=True)

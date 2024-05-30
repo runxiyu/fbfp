@@ -5,9 +5,9 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	{% if work.anonymous %}
-		<title>#{{ work.wid }} {{ work.title }} by anonymous &ndash; {{ fbfpc["site_title"] }}</title>
+		<title>#{{ work.id }} {{ work.title }} by anonymous &ndash; {{ fbfpc["site_title"] }}</title>
 	{% else %}
-		<title>#{{ work.wid }} {{ work.title }} by {{ work.user.name }} &ndash; {{ fbfpc["site_title"] }}</title>
+		<title>#{{ work.id }} {{ work.title }} by {{ work.user.name }} &ndash; {{ fbfpc["site_title"] }}</title>
 	{% endif %}
 	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
 </head>
@@ -31,7 +31,7 @@
 			</tr>
 			<tr>
 				<th scope="row">ID</th>
-				<td>{{ work.wid }}</td>
+				<td>{{ work.id }}</td>
 			</tr>
 			{% if (not work.anonymous) or (work.user.oid == user.oid) %}
 			<tr>

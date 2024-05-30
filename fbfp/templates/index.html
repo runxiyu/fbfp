@@ -50,9 +50,9 @@
 			</tr>
 			{% for w in wyours %}
 			<tr>
-				<th scope="row" class="min">{{ w.wid }}</th>
+				<th scope="row" class="min">{{ w.id }}</th>
 				<td class="min flags">{%if w.public%}<abbr title="Public">P</abbr>{%else%}<abbr title="Private">x</abbr>{%endif%}{%if w.active%}<abbr title="Active">!</abbr>{%else%}<abbr title="Inactive">-</abbr>{%endif%}{%if w.anonymous%}<abbr title="Anonymous">*</abbr>{%else%}<abbr title="Non-anonymous"</abbr>@</abbr>{%endif%}</td>
-				<td><a href="{{ url_for(".work", wid=w.wid) }}">{{ w.title }}</a></td>
+				<td><a href="{{ url_for(".work", id=w.id) }}">{{ w.title }}</a></td>
 			</tr>
 			{% endfor %}
 			<tr>
@@ -74,13 +74,13 @@
 			</tr>
 			{% for w in wothers %}
 			<tr>
-				<th scope="row" class="min">{{ w.wid }}</th>
+				<th scope="row" class="min">{{ w.id }}</th>
 				{% if w.anonymous %}
 				<td class="min" class="anonymous">Anonymous</td>
 				{% else %}
 				<td class="min"><a href="{{ url_for(".user", oid=w.user.oid) }}">{{ w.user.name }}</a></td>
 				{% endif %}
-				<td><a href="{{ url_for(".work", wid=w.wid) }}">{{ w.title }}</a></td>
+				<td><a href="{{ url_for(".work", id=w.id) }}">{{ w.title }}</a></td>
 			</tr>
 			{% endfor %}
 			<tr>
