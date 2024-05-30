@@ -9,6 +9,7 @@
 	--rowbg-odd: #fcfcfc;
 	--danger: #d32535;
 	--danger-contrast: #ffffff;
+	--anchor-underline-color: lightgray;
 }
 
 .greyedout {
@@ -44,7 +45,29 @@ hr {
 
 a {
 	color: var(--theme);
+	/* text-decoration: none; */
+	text-decoration: underline;
+	text-decoration-color: var(--anchor-underline-color);
+}
+
+#site-title {
 	text-decoration: none;
+}
+
+
+nav ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+}
+
+nav ul > li {
+	display: inline-block;
+}
+
+nav ul > li:not(:last-child)::after {
+	content:"\2000"
 }
 
 h2, h3, h4, h5, h6 {
@@ -60,6 +83,10 @@ header {
 	background-color: var(--theme);
 	z-index: 1000;
 	width: 100%;
+}
+
+header a {
+	text-decoration: none;
 }
 
 footer {
@@ -240,6 +267,10 @@ form:not([class="plain"]) button {
 	transition: background .1s linear;
 	border: none;
 	cursor: pointer;
+}
+
+a.btn {
+	text-decoration: none;
 }
 
 div.formgroup + div.formgroup {
