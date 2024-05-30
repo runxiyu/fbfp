@@ -275,18 +275,19 @@ td.tdinput textarea, td.tdinput input[type=text] {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: none;
+	gap: 1rem;
 	@media(max-width: 40rem) {
 		flex-wrap: wrap;
+		gap: 0rem;
 	}
-	gap: 1rem;
 	align-items: stretch;
 }
 
 .multicols div {
 	min-width: 15em;
-	max-width: 40rem;
 	width: 100%;
-	margin: auto;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .flex-justify {

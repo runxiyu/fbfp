@@ -108,6 +108,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         user = ensure_user(context)
         wyours = user.works
         wothers = list(db.session.query(models.Work).filter(models.Work.user != user).filter(models.Work.public == True))  # type: ignore # FIXME
+        flask.flash("Flash")
         return flask.Response(
             flask.render_template(
                 "index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
@@ -154,13 +155,28 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     def work_delete(context: context_t, id: int) -> response_t:
         user = ensure_user(context)
         if not ((work := db.session.get(models.Work, id)) and (work.user is user)):
-            raise nope(403, "You cannot delete a nonexistent work or one owned by someone else.")
+            raise nope(
+                403,
+                "You cannot delete a nonexistent work or one owned by someone else.",
+            )
         if flask.request.method == "GET":
-            return flask.Response(flask.render_template("work_delete.html", user=user, fbfpc=fbfpc(), work=work, first=True))
+            return flask.Response(
+                flask.render_template(
+                    "work_delete.html", user=user, fbfpc=fbfpc(), work=work, first=True
+                )
+            )
         else:
             confirm = flask.request.form.get("confirm", None) != None
             if not confirm:
-                return flask.Response(flask.render_template("work_delete.html", user=user, fbfpc=fbfpc(), work=work, first=False))
+                return flask.Response(
+                    flask.render_template(
+                        "work_delete.html",
+                        user=user,
+                        fbfpc=fbfpc(),
+                        work=work,
+                        first=False,
+                    )
+                )
             db.session.delete(work)
             db.session.flush()
             db.session.commit()
@@ -276,7 +292,6 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
 
         id = work.id
         assert type(id) is int
-
 
         return flask.redirect(flask.url_for(".work", id=id))
 
