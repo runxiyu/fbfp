@@ -25,6 +25,7 @@ import werkzeug
 import werkzeug.security
 import werkzeug.middleware.proxy_fix
 
+from sqlalchemy import select
 from .database import db
 from . import models
 from .types import *
@@ -34,7 +35,7 @@ from .exceptions import *
 VERSION = """fbfp v0.1
 
 License: GNU Affero General Public License v3.0 or later
-URL: https://sr.ht/~runxiyu/fbfp"""
+URL: https://git.sr.ht/~runxiyu/fbfp"""
 
 
 def no_login_required(
@@ -81,6 +82,9 @@ def fbfpc_init(app: flask.Flask) -> None:
     app.config["FBFPC"]["max_file_size_human"] = humanize.naturalsize(
         max_file_size, binary=True
     )
+    app.config["FBFPC"]["upload_path"] = os.path.abspath(
+        app.config["FBFPC"]["upload_path"]
+    )
 
 
 def fbfpc() -> typing.Any:
@@ -94,21 +98,18 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     @login_required
     def index(context: context_t) -> response_t:
         user = ensure_user(context)
+        # TODO: More Mypy errors below
+        wyours = list(db.session.query(models.Work).filter(models.Work.user == user))  # type: ignore
+        wothers = list(db.session.query(models.Work).filter(models.Work.user != user))  # type: ignore
         return flask.Response(
             flask.render_template(
-                "index.html", user=user, fbfpc=fbfpc(), wyours=None, wothers=None
+                "index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
             )
         )
 
     @bp.route("/static/<path:filename>", methods=["GET"])
     def static(filename: str) -> response_t:
         return flask.send_from_directory(fbfpc()["static_dir"], filename)
-
-    @bp.route("/me", methods=["GET"])
-    @login_required
-    def me(context: context_t) -> response_t:
-        user = ensure_user(context)
-        return flask.Response("")
 
     # FIXME: Typing is broken because of how I typed login_required
     #        https://todo.sr.ht/~runxiyu/fbfp/6
@@ -120,7 +121,31 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             raise nope(
                 404, "Submission %d does not exist" % wid
             )  # TODO: also inaccessible ones
-        return {"wid": work.wid, "title": work.title, "text": work.text}  # type: ignore
+        return flask.Response(
+            flask.render_template("view.html", user=user, fbfpc=fbfpc(), work=work)
+        )
+
+    @bp.route("/list", methods=["GET"])
+    @login_required
+    def list_(context: context_t) -> response_t:
+        user = ensure_user(context)
+        raise nope(501, "/list not implemented")
+
+    @bp.route("/user/<oid>", methods=["GET"])  # type: ignore # FIXME
+    @login_required
+    def user(context: context_t, oid: str) -> response_t:
+        user = ensure_user(context)
+        if not (target := db.session.get(models.User, oid)):
+            raise nope(404, "I don't know a user with the OID of %s" % oid)
+        return {"oid": target.oid, "email": target.email, "name": target.name}
+        # raise nope(501, "/user not implemented")
+
+    # Not authenticated because filename is partially random
+    @bp.route("/file/<filename>", methods=["GET"])
+    def file(filename: str) -> response_t:
+        return flask.send_from_directory(
+            fbfpc()["upload_path"], filename, as_attachment=True
+        )
 
     @bp.route("/new", methods=["GET", "POST"])
     @login_required
@@ -159,16 +184,26 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         except KeyError as e:
             raise nope(400, "Form does not include %s" % e.args[0])
 
+        if not title.strip():
+            raise nope(400, "You didn't include a title.")
+
         if not (text.strip() or local_filename):
             raise nope(
                 400,
                 "Your submission is basically empty. You need to upload a file or insert some text.",
             )
 
+        anonymous = flask.request.form.get("anonymous", None) != None
+        public = flask.request.form.get("public", None) != None
+        active = flask.request.form.get("active", None) != None
+
         work = models.Work(
             user=user,
             title=title,
             text=text,
+            anonymous=anonymous,
+            active=active,
+            public=public,
             filename=os.path.basename(local_filename) if local_filename else None,
         )
 

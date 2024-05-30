@@ -94,10 +94,13 @@ header h1 {
 table {
 	margin-top: 0.4em;
 	margin-bottom: 0.4em;
-	width: 100%;
 	border-collapse: collapse;
 	border: 2px solid var(--border);
 	font-size: 90%;
+}
+
+table.wide {
+	width: 100%;
 }
 
 th {
@@ -123,11 +126,15 @@ td {
 	padding: 3px 5px;
 }
 
+form table td {
+	padding: 6px 5px;
+}
+
 td.th-like {
 	background-color: var(--boxbg) !important;
 }
 
-td.min {
+th.min, td.min {
 	width: 0;
 	min-width: fit-content;
 	white-space: nowrap;
@@ -239,8 +246,8 @@ td.tdinput {
 	padding: 0rem;
 }
 td.tdinput textarea, td.tdinput input[type=text] {
-	padding: 3px 5px;
-	background-color: inherit !important;
+	/* background-color: inherit !important; */
+	background-color: transparent !important;
 }
 
 /* not sure how to make these lengths dynamic */
@@ -274,4 +281,8 @@ pre {
 	background-color: rgb(240, 240, 240);
 	padding: 0.3rem;
 	overflow-x: scroll;
+}
+
+.flags, .filename {
+	font-family: monospace;
 }

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{# This comment makes vim detect the filetype correctly #}
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	{% if work.anonymous %}
+		<title>#{{ work.wid }} {{ work.title }} by anonymous &ndash; {{ fbfpc["site_title"] }}</title>
+	{% else %}
+		<title>#{{ work.wid }} {{ work.title }} by {{ work.user.name }} &ndash; {{ fbfpc["site_title"] }}</title>
+	{% endif %}
+	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
+</head>
+<body>
+<header>
+	<div class="header-content">
+		<div class="header-left">
+			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
+		</div>
+		<div class="header-right">
+			<p><a href="{{ url_for(".user", oid=user.oid) }}">{{ user.name }}</a></p>
+		</div>
+	</div>
+</header>
+<main>
+	<h2>{{work.title}}</h2>
+	<table>
+		<tr>
+			<th scope="row">
+				ID
+			</th>
+			<td>
+				{{ work.wid }}
+			</td>
+		</tr>
+		<tr>
+			<th scope="row">
+				Author
+			</th>
+			{% if work.anonymous %}
+			<td class="anonymous">Anonymous</td>
+			{% else %}
+			<td>{{ work.user.name }}</td>
+			{% endif %}
+		</tr>
+		{% if work.user.oid == user.oid %}
+		<tr>
+			<th scope="row">
+				Public
+			</th>
+			<td>
+				{{ work.public }}
+				!TODO: Insert a CHANGE button or something
+			</td>
+		</tr>
+		{% endif %}
+		<tr>
+			<th scope="row">
+				Active
+			</th>
+			<td>
+				{{ work.active }}
+				{% if work.user.oid == user.oid %}
+				!TODO: Insert a CHANGE button or something
+				{% endif %}
+			</td>
+		</tr>
+		<tr>
+			<th scope="row">
+				File
+			</th>
+			{% if work.filename %}
+			<td>
+				<a class="filename" href="{{url_for(".file", filename=work.filename)}}">{{ work.filename }}</a>
+			</td>
+			{% else %}
+			<td>
+				None
+			</td>
+			{% endif %}
+		</tr>
+	</table>
+</main>
+</body>
+</html>

@@ -37,11 +37,21 @@ class Work(database.db.Model):  # type: ignore
     title = mapped_column(String(255), unique=False)
     text = mapped_column(String, unique=False)
     filename = mapped_column(String(255), unique=True)
+    anonymous = mapped_column(Boolean, unique=False)
+    public = mapped_column(Boolean, unique=False)
+    active = mapped_column(Boolean, unique=False)
     oid = mapped_column(ForeignKey("fbfp_users.oid"))
     user: Mapped["User"] = relationship(back_populates="works")
 
     def __init__(
-        self, user: User, title: str, text: Optional[str], filename: Optional[str]
+        self,
+        user: User,
+        title: str,
+        text: Optional[str],
+        filename: Optional[str],
+        anonymous: bool,
+        public: bool,
+        active: bool,
     ) -> None:
         self.user = user
         self.title = title
@@ -53,3 +63,4 @@ class Work(database.db.Model):  # type: ignore
             self.filename = filename
         else:
             self.filename = None
+        self.anonymous, self.public, self.active = anonymous, public, active
