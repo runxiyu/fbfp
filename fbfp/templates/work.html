@@ -24,48 +24,51 @@
 </header>
 <main>
 	<h2>{{work.title}}</h2>
-	<table>
-		<tr>
-			<th scope="row">
-				ID
-			</th>
-			<td>
-				{{ work.wid }}
-			</td>
-		</tr>
-		{% if (not work.anonymous) or (work.user.oid == user.oid) %}
-		<tr>
-			<th scope="row">
-				Author
-			</th>
-			<td><a href="{{ url_for(".user", oid=work.user.oid) }}">{{ work.user.name }}</a></td>
-		</tr>
-		{% endif %}
-		<tr>
-			<th scope="row">
-				Flags
-			</th>
-			<td>
-				<input id="flag-public" type="checkbox" name="public" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.public %}checked{% endif %}><label for="flag-public">Public</label>
-				<input id="flag-active" type="checkbox" name="active" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.active %}checked{% endif %}><label for="flag-active">Active</label>
-				<input id="flag-anonymous" type="checkbox" name="anonymous" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.anonymous %}checked{% endif %}><label for="flag-anonymous">Anonymous</label>
-			</td>
-		</tr>
-		<tr>
-			<th scope="row">
-				File
-			</th>
-			{% if work.filename %}
-			<td>
-				<a class="filename" href="{{url_for(".file", filename=work.filename)}}">{{ work.filename }}</a>
-			</td>
-			{% else %}
-			<td>
-				None
-			</td>
+	<form method="POST">
+		<table>
+			<tr>
+				<th colspan=2>Metadata</th>
+			</tr>
+			<tr>
+				<th scope="row">ID</th>
+				<td>{{ work.wid }}</td>
+			</tr>
+			{% if (not work.anonymous) or (work.user.oid == user.oid) %}
+			<tr>
+				<th scope="row">Author</th>
+				<td><a href="{{ url_for(".user", oid=work.user.oid) }}">{{ work.user.name }}</a></td>
+			</tr>
 			{% endif %}
-		</tr>
-	</table>
+			<tr>
+				<th scope="row">Flags</th>
+				<td>
+					<input id="flag-public" type="checkbox" name="public" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.public %}checked{% endif %}><label for="flag-public">Public</label>
+					<input id="flag-active" type="checkbox" name="active" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.active %}checked{% endif %}><label for="flag-active">Active</label>
+					<input id="flag-anonymous" type="checkbox" name="anonymous" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.anonymous %}checked{% endif %}><label for="flag-anonymous">Anonymous</label>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">File</th>
+				{% if work.filename %}
+				<td><a class="filename" href="{{url_for(".file", filename=work.filename)}}">{{ work.filename }}</a></td>
+				{% else %}
+				<td>None</td>
+				{% endif %}
+			</tr>
+			<tr>
+				<td class="th-like" colspan=2>
+						<div class="flex-justify">
+							<div class="left">
+								<input type="submit" value="Update" />
+							</div>
+							<div class="right">
+								<span class="greyedout">Max {{ fbfpc["max_request_size_human"] }}</span>
+							</div>
+						</div>
+				</td>
+			</tr>
+		</table>
+	</form>
 	{% if not work.text %}
 	<p>
 	This work has no raw text. Check the file.

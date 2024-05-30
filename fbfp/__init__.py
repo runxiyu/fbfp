@@ -44,15 +44,10 @@ def no_login_required(
     @functools.wraps(f)
     def wrapper(*args: Any, **kwargs: Any) -> response_t:
         context = {
-            # "user": {
-            #     "name": "Test User",
-            #     "preferred_username": "test@example.org",
-            #     "oid": "00000000-0000-0000-0000-000000000000",
-            # },
             "user": {
-                "name": "First User",
-                "preferred_username": "first@example.org",
-                "oid": "00000000-0000-0000-0000-000000000001",
+                "name": "Test User",
+                "preferred_username": "test@example.org",
+                "oid": "00000000-0000-0000-0000-000000000000",
             },
         }
         return f(context, *args, **kwargs)
@@ -125,7 +120,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
 
     # FIXME: Typing is broken because of how I typed login_required
     #        https://todo.sr.ht/~runxiyu/fbfp/6
-    @bp.route("/work/<int:wid>", methods=["GET"])  # type: ignore
+    @bp.route("/work/<int:wid>", methods=["GET", "POST"])  # type: ignore
     @login_required
     def work(context: context_t, wid: int) -> response_t:
         user = ensure_user(context)
@@ -133,6 +128,18 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             (not work.public) and (work.user is not user)
         ):
             raise nope(404, "Submission %d does not exist or is private" % wid)
+        if flask.request.method == "POST":
+            if work.user is not user:
+                raise nope(403, "You are not authorized to update another user's work.")
+
+            work.anonymous = flask.request.form.get("anonymous", None) != None
+            work.public = flask.request.form.get("public", None) != None
+            work.active = flask.request.form.get("active", None) != None
+
+            db.session.flush()
+            db.session.refresh(work)
+            db.session.commit()
+
         return flask.Response(
             flask.render_template("work.html", user=user, fbfpc=fbfpc(), work=work)
         )
