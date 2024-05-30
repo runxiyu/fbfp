@@ -44,11 +44,16 @@ def no_login_required(
     @functools.wraps(f)
     def wrapper(*args: Any, **kwargs: Any) -> response_t:
         context = {
+            # "user": {
+            #     "name": "Test User",
+            #     "preferred_username": "test@example.org",
+            #     "oid": "00000000-0000-0000-0000-000000000000",
+            # },
             "user": {
-                "name": "Test User",
-                "preferred_username": "test@example.org",
-                "oid": "00000000-0000-0000-0000-000000000000",
-            }
+                "name": "First User",
+                "preferred_username": "first@example.org",
+                "oid": "00000000-0000-0000-0000-000000000001",
+            },
         }
         return f(context, *args, **kwargs)
 
@@ -107,7 +112,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     def index(context: context_t) -> response_t:
         user = ensure_user(context)
         wyours = user.works
-        wothers = list(db.session.query(models.Work).filter(models.Work.user != user))  # type: ignore # FIXME
+        wothers = list(db.session.query(models.Work).filter(models.Work.user != user).filter(models.Work.public == True))  # type: ignore # FIXME
         return flask.Response(
             flask.render_template(
                 "index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
@@ -120,16 +125,16 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
 
     # FIXME: Typing is broken because of how I typed login_required
     #        https://todo.sr.ht/~runxiyu/fbfp/6
-    @bp.route("/view/<int:wid>", methods=["GET"])  # type: ignore
+    @bp.route("/work/<int:wid>", methods=["GET"])  # type: ignore
     @login_required
-    def view(context: context_t, wid: int) -> response_t:
+    def work(context: context_t, wid: int) -> response_t:
         user = ensure_user(context)
-        if not (work := db.session.get(models.Work, wid)):
-            raise nope(
-                404, "Submission %d does not exist" % wid
-            )  # TODO: also inaccessible ones
+        if (not (work := db.session.get(models.Work, wid))) or (
+            (not work.public) and (work.user is not user)
+        ):
+            raise nope(404, "Submission %d does not exist or is private" % wid)
         return flask.Response(
-            flask.render_template("view.html", user=user, fbfpc=fbfpc(), work=work)
+            flask.render_template("work.html", user=user, fbfpc=fbfpc(), work=work)
         )
 
     @bp.route("/list", methods=["GET"])
@@ -242,7 +247,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         wid = work.wid
         assert type(wid) is int
 
-        return flask.redirect(flask.url_for(".view", wid=wid))
+        return flask.redirect(flask.url_for(".work", wid=wid))
 
     return bp
 
