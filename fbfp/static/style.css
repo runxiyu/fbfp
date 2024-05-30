@@ -122,15 +122,6 @@ header h1 {
 	font-size: 25px;
 }
 
-#snotes {
-	margin-top: 0.4em;
-	margin-bottom: 0.4em;
-	padding: 0.4em;
-	border: 1px solid #ccc;
-	border-radius: 0.4em;
-	font-size: 90%;
-}
-
 table {
 	margin-top: 0.4em;
 	margin-bottom: 0.4em;

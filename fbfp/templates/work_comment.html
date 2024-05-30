@@ -45,7 +45,7 @@
 	{% else %}
 	<article class="work-text"><details><summary>View text</summary>{{ work.text }}</details></article>
 	{% endif %}
-	<form method="POST">
+	<form method="POST" enctype="multipart/form-data">
 		<table class="fat wide capline">
 			<caption style="display: none;">
 				Submit
@@ -80,7 +80,7 @@
 					<div class="left">
 						<input title="" value="" type="file" id="fileupload" name="file" />
 					</div>
-					<div class="right"
+					<div class="right">
 						<span class="greyedout">Max {{ fbfpc["max_file_size_human"] }}</span>
 					</div>
 				</td>
@@ -102,4 +102,9 @@
 </main>
 {% endblock %}
 {% block final_script %}
+<script>
+	/* SPDX-License-Identifier: CC0-1.0 */
+	const max_file_size = {{ fbfpc["max_file_size"] }};
+</script>
+<script defer src="{{ url_for(".static", filename="file-upload-size-check.js") }}"></script>
 {% endblock %}
