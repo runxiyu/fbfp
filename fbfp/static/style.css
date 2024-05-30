@@ -7,6 +7,8 @@
 	--boxfg: #000000;
 	--rowbg-even: #ffffff;
 	--rowbg-odd: #fcfcfc;
+	--danger: #d32535;
+	--danger-contrast: #ffffff;
 }
 
 .greyedout {
@@ -208,9 +210,16 @@ form:not([class="plain"]) button {
 
 */
 
-.btn-primary, input[type=submit] {
+.btn-primary, input[type=submit]:not(.btn-danger) {
 	background: var(--theme);
 	color: var(--theme-contrast);
+	border: var(--border) 1px solid;
+	font-weight: bold;
+}
+
+.btn-danger {
+	background: var(--danger);
+	color: var(--danger-contrast);
 	border: var(--border) 1px solid;
 	font-weight: bold;
 }
@@ -303,4 +312,15 @@ article.work-text {
 	margin-right: auto;
 	white-space: pre-wrap;
 	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
 }
+
+form.dialogue {
+	background-color: var(--boxbg);
+	border: 2px solid var(--border);
+	font-size: 90%;
+	border-collapse: collapse;
+	padding: 0rem 0.5rem;
+	max-width: 20rem;
+}
+

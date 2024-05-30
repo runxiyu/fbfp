@@ -58,7 +58,7 @@ def no_login_required(
 def ensure_user(context: context_t) -> models.User:
     if first_attempt := db.session.get(models.User, context["user"]["oid"]):
         # TODO: The following is done *just in case* the name or emails
-        # change. This is obviously inefficient but shoudln't be a
+        # change. This is obviously inefficient but shouldn't be a
         # bottleneck for now.
         first_attempt.name = context["user"]["name"]
         first_attempt.email = context["user"]["preferred_username"]
@@ -148,6 +148,24 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 "work.html", user=user, fbfpc=fbfpc(), work=work, updated=updated
             )
         )
+
+    @bp.route("/work/<int:id>/delete", methods=["GET", "POST"])  # type: ignore
+    @login_required
+    def work_delete(context: context_t, id: int) -> response_t:
+        user = ensure_user(context)
+        if not ((work := db.session.get(models.Work, id)) and (work.user is user)):
+            raise nope(403, "You cannot delete a nonexistent work or one owned by someone else.")
+        if flask.request.method == "GET":
+            return flask.Response(flask.render_template("work_delete.html", user=user, fbfpc=fbfpc(), work=work, first=True))
+        else:
+            confirm = flask.request.form.get("confirm", None) != None
+            if not confirm:
+                return flask.Response(flask.render_template("work_delete.html", user=user, fbfpc=fbfpc(), work=work, first=False))
+            db.session.delete(work)
+            db.session.flush()
+            db.session.commit()
+            flask.flash("Deleted #%d" % id)
+            return flask.redirect(flask.url_for(".index"))
 
     @bp.route("/list", methods=["GET"])
     @login_required
@@ -259,6 +277,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         id = work.id
         assert type(id) is int
 
+
         return flask.redirect(flask.url_for(".work", id=id))
 
     return bp
@@ -311,5 +330,6 @@ def make_debug_app() -> flask.App:
         },
     )
     assert app.config["DEBUG"] == True
+    app.config["SECRET_KEY"] = "DEBUG_ONLY"
 
     return app
