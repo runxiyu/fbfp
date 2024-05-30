@@ -404,6 +404,8 @@ def make_app(login_required: login_required_t, **config: typing.Any) -> flask.Ap
     app.config.update(**config)
     fbfpc_init(app)
     app.jinja_env.undefined = jinja2.StrictUndefined
+    app.jinja_env.trim_blocks = True
+    app.jinja_env.lstrip_blocks = True
     db.init_app(app)
 
     @app.errorhandler(nope)
