@@ -29,12 +29,11 @@ body {
 	min-height: 100vh;
 }
 
-main {
+main, body > section {
 	padding-left: 1rem;
 	padding-right: 1rem;
 	margin: 1rem auto;
 	max-width: 60rem;
-	flex: 1;
 }
 
 hr {
@@ -325,3 +324,6 @@ form.dialogue {
 	max-width: 20rem;
 }
 
+table#flashes {
+	margin-bottom: 0rem;
+}

@@ -1,65 +1,29 @@
-<!DOCTYPE html>
-{# This comment makes vim detect the filetype correctly #}
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>{{ fbfpc["site_title"] }}</title>
-	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
-	<style>
-	.tp-columns {
-		display: flex;
-		flex-direction: row;
-		@media(max-width: 50rem) {
-			flex-wrap: wrap;
-			gap: 0rem;
-		}
-		gap: 2rem;
-		align-items: stretch;
+{% extends "base.html" %}
+{% block titleprefix %}Index{% endblock %}
+{% block extra_head %}
+<style>
+.tp-columns {
+	display: flex;
+	flex-direction: row;
+	@media(max-width: 50rem) {
+		flex-wrap: wrap;
+		gap: 0rem;
 	}
-	
-	.tp-columns div {
-		min-width: 18em;
-		/* max-width: 40rem; */
-		width: 100%;
-		margin-left: auto;
-		margin-right: auto;
-	}
-	</style>
-</head>
-<body>
-<header>
-	<div class="header-content">
-		<div class="header-left">
-			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
-		</div>
-		<div class="header-right">
-			<p><a href="{{ url_for(".user", oid=user.oid) }}">{{ user.name }}</a></p>
-		</div>
-	</div>
-</header>
-<main>
-	{% with messages = get_flashed_messages() %}
-	{% if messages %}
-	<table class="wide" id="flashes">
-		<tr>
-			<th colspan=2>
-				Callback Messages
-			</th>
-		</tr>
-		{% for m in messages %}
-		<tr>
-			<th scope="row">
-			{{ loop.index }}
-			</th>
-			<td>
-			{{ m }}
-			</td>
-		</tr>
-		{% endfor %}
-	</table>
-	{% endif %}
-	{% endwith %}
+	gap: 2rem;
+	align-items: stretch;
+}
+
+.tp-columns div {
+	min-width: 18em;
+	/* max-width: 40rem; */
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+}
+</style>
+{% endblock %}
+{% block main %}
+<main class="tp-columns">
 	<div class="tp-columns">
 		<div id="yours">
 			<table class="wide">
@@ -102,7 +66,7 @@
 				<tr>
 					<th scope="row" class="min">{{ w.id }}</th>
 					{% if w.anonymous %}
-					<td class="min" class="anonymous">Anonymous</td>
+					<td class="min anonymous">Anonymous</td>
 					{% else %}
 					<td class="min"><a href="{{ url_for(".user", oid=w.user.oid) }}">{{ w.user.name }}</a></td>
 					{% endif %}
@@ -120,5 +84,4 @@
 		</div>
 	</div>
 </main>
-</body>
-</html>
+{% endblock %}

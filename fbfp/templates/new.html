@@ -1,24 +1,9 @@
-<!DOCTYPE html>
-{# This comment makes vim detect the filetype correctly #}
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>New &ndash; {{ fbfpc["site_title"] }}</title>
-	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
-</head>
-<body>
-<header>
-	<div class="header-content">
-		<div class="header-left">
-			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
-		</div>
-		<div class="header-right">
-			<p><a href="{{ url_for(".user", oid=user.oid) }}">{{ user.name }}</a></p>
-		</div>
-	</div>
-</header>
-<main class="tp-columns">
+{% extends "base.html" %}
+{% block titleprefix %}New{% endblock %}
+{% block extra_head %}
+{% endblock %}
+{% block main %}
+<main>
 	<form id="form-new" method="POST" enctype="multipart/form-data">
 		<div class="formgroup">
 			{#
@@ -82,6 +67,8 @@
 		<table>
 	</form>
 </main>
+{% endblock %}
+{% block final_script %}
 <script>
 	/* SPDX-License-Identifier: CC0-1.0 */
 	const uploadField = document.getElementById("fileupload");
@@ -92,5 +79,4 @@
 		}
 	};
 </script>
-</body>
-</html>
+{% endblock %}

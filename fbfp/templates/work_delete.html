@@ -1,23 +1,8 @@
-<!DOCTYPE html>
-{# This comment makes vim detect the filetype correctly #}
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>DELETING #{{ work.id }} {{ work.title }} &ndash; {{ fbfpc["site_title"] }}</title>
-	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
-</head>
-<body>
-<header>
-	<div class="header-content">
-		<div class="header-left">
-			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
-		</div>
-		<div class="header-right">
-			<p><a href="{{ url_for(".user", oid=user.oid) }}">{{ user.name }}</a></p>
-		</div>
-	</div>
-</header>
+{% extends "base.html" %}
+{% block titleprefix %}DELETING #{{ work.id }} {{ work.title }}{% endblock %}
+{% block extra_head %}
+{% endblock %}
+{% block main %}
 <main>
 	<h2>Deletion Confirmation</h2>
 	<table>
@@ -72,5 +57,6 @@
 		</p>
 	</form>
 </main>
-</body>
-</html>
+{% endblock %}
+{% block final_script %}
+{% endblock %}

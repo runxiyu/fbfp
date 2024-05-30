@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{# This comment makes vim detect the filetype correctly #}
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>{% block titleprefix %}BROKEN PAGE{% endblock %} &ndash; {{ fbfpc["site_title"] }}</title>
+	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
+	{% block extra_head %}
+	{% endblock %}
+</head>
+<body>
+<header>
+	{% block header %}
+	<div class="header-content">
+		<div class="header-left">
+			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
+		</div>
+		<div class="header-right">
+			<p><a href="{{ url_for(".user", oid=user.oid) }}">{{ user.name }}</a></p>
+		</div>
+	</div>
+	{% endblock %}
+</header>
+<section>
+	{% with messages = get_flashed_messages() %}
+	{% if messages %}
+	<table class="wide" id="flashes">
+		<tr>
+			<th colspan=2>
+				Callback Messages
+			</th>
+		</tr>
+		{% for m in messages %}
+		<tr>
+			<th scope="row">
+			{{ loop.index }}
+			</th>
+			<td>
+			{{ m }}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+	{% endwith %}
+</section>
+{% block main %}
+<main>
+	<p>
+	Oops! You need to replace the <code>main</code>block when your extend this base.
+	</p>
+</main>
+{% endblock %}
+{% block final_script %}
+{% endblock %}
+</body>
+</html>

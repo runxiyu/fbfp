@@ -108,12 +108,15 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         user = ensure_user(context)
         wyours = user.works
         wothers = list(db.session.query(models.Work).filter(models.Work.user != user).filter(models.Work.public == True))  # type: ignore # FIXME
-        flask.flash("Flash")
         return flask.Response(
             flask.render_template(
                 "index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
             )
         )
+
+    @bp.route("/nope", methods=["GET"])
+    def test_nope() -> response_t:
+        raise nope(418, "This endpoint tests the NOPE handler.")
 
     @bp.route("/static/<path:filename>", methods=["GET"])
     def static(filename: str) -> response_t:

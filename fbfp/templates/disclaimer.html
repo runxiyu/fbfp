@@ -1,23 +1,6 @@
-<!DOCTYPE html>
-{# This comment makes vim detect the filetype correctly #}
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>DISCLAIMER &ndash; {{ fbfpc["site_title"] }}</title>
-	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
-</head>
-<body>
-<header>
-	<div class="header-content">
-		<div class="header-left">
-			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
-		</div>
-		<div class="header-right">
-			<p><a href="{{ url_for(".user", oid=user.oid) }}">{{ user.name }}</a></p>
-		</div>
-	</div>
-</header>
+{% extends "base.html" %}
+{% block titleprefix %}Disclaimer{% endblock %}
+{% block main %}
 <main class="tp-columns">
 	<h2>Disclaimer</h2>
 	<p>
@@ -35,6 +18,7 @@
 		</p>
 	</details>
 </main>
+{% endblock %}
 </body>
 </html>
 

@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-{# This comment makes vim detect the filetype correctly #}
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Error &ndash; {{ fbfpc["site_title"] }}</title>
-	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
+{% extends "base.html" %}
+{% block titleprefix %}Error{% endblock %}
+{% block extra_head %}
 <style>
 p#errmsg {
 	font-weight: bold;
@@ -20,18 +15,17 @@ header {
 	background-color: rgb(255, 0, 0);
 }
 </style>
-</head>
-<body>
+{% endblock %}
+{% block header %}
 <header>
 	<div class="header-content">
 		<div class="header-left">
 			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
 		</div>
-		<div class="header-right">
-			{# <p><a href="{{ url_for(".user", oid=user.oid) }}">{{ user.name }}</a></p> #}
-		</div>
 	</div>
 </header>
+{% endblock %}
+{% block main %}
 <main>
 <p>
 I cannot handle your request because of an error:
@@ -57,5 +51,6 @@ If you are a technical user, you may want to view the source code of this websit
 <pre id="errver">{{errver}}</pre>
 {% endif %}
 </main>
-</body>
-</html>
+{% endblock %}
+{% block final_script %}
+{% endblock %}

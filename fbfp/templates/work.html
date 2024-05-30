@@ -1,27 +1,8 @@
-<!DOCTYPE html>
-{# This comment makes vim detect the filetype correctly #}
-<html lang="en">
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	{% if work.anonymous %}
-		<title>#{{ work.id }} {{ work.title }} by anonymous &ndash; {{ fbfpc["site_title"] }}</title>
-	{% else %}
-		<title>#{{ work.id }} {{ work.title }} by {{ work.user.name }} &ndash; {{ fbfpc["site_title"] }}</title>
-	{% endif %}
-	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
-</head>
-<body>
-<header>
-	<div class="header-content">
-		<div class="header-left">
-			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
-		</div>
-		<div class="header-right">
-			<p><a href="{{ url_for(".user", oid=user.oid) }}">{{ user.name }}</a></p>
-		</div>
-	</div>
-</header>
+{% extends "base.html" %}
+{% block titleprefix %}{% if work.anonymous %}#{{ work.id }} {{ work.title }} by anonymous{% else %}#{{ work.id }} {{ work.title }} by {{ work.user.name }}{% endif %}{% endblock %}
+{% block extra_head %}
+{% endblock %}
+{% block main %}
 <main>
 	<h2>{{work.title}}</h2>
 	<form method="POST">
@@ -80,5 +61,6 @@
 	<article class="work-text">{{ work.text }}</article>
 	{% endif %}
 </main>
-</body>
-</html>
+{% endblock %}
+{% block final_script %}
+{% endblock %}
