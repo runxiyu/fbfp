@@ -24,6 +24,7 @@ html {
 body {
 	margin: 0;
 	padding: 0;
+	min-height: 100vh;
 }
 
 main {
@@ -31,6 +32,7 @@ main {
 	padding-right: 1rem;
 	margin: 1rem auto;
 	max-width: 60rem;
+	flex: 1;
 }
 
 hr {
@@ -57,6 +59,16 @@ header {
 	background-color: var(--theme);
 	z-index: 1000;
 	width: 100%;
+}
+
+footer {
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+footer p {
+	margin-top: 0rem;
+	margin-bottom: 1ex;
 }
 
 .header-content {
@@ -255,6 +267,7 @@ td.tdinput textarea, td.tdinput input[type=text] {
 .multicols {
 	display: flex;
 	flex-direction: row;
+	flex-wrap: none;
 	@media(max-width: 40rem) {
 		flex-wrap: wrap;
 	}

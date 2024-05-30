@@ -94,6 +94,14 @@ def fbfpc() -> typing.Any:
 def make_bp(login_required: login_required_t) -> flask.Blueprint:
     bp = flask.Blueprint("fbfp", __name__, url_prefix="/", template_folder="templates")
 
+    @bp.route("/disclaimer", methods=["GET"])
+    @login_required
+    def disclaimer(context: context_t) -> response_t:
+        user = ensure_user(context)
+        return flask.Response(
+            flask.render_template("disclaimer.html", user=user, fbfpc=fbfpc())
+        )
+
     @bp.route("/", methods=["GET"])
     @login_required
     def index(context: context_t) -> response_t:
@@ -282,6 +290,7 @@ def make_debug_app() -> flask.App:
             "max_file_size": 3000000,
             "upload_path": "uploads",
             "require_free_space": 3 * 1024 * 1024 * 1024,
+            "version_info": VERSION,
         },
     )
     assert app.config["DEBUG"] == True
