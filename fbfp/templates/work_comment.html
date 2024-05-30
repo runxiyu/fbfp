@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titleprefix %}DELETING #{{ work.id }} {{ work.title }}{% endblock %}
+{% block extra_head %}
+{% endblock %}
+{% block main %}
+<main>
+	<h2>Whole-work Comment on #{{ work.id }}</h2>
+	<table>
+		<tr>
+			<th colspan=2>Information</th>
+		</tr>
+		<tr>
+			<th scope="row">ID</th>
+			<td>{{ work.id }}</td>
+		</tr>
+		<tr>
+			<th scope="row">Title</th>
+			<td>{{ work.title }}</td>
+		</tr>
+		<tr>
+			<th scope="row">Author</th>
+			<td><a href="{{ url_for(".user", oid=work.user.oid) }}">{{ work.user.name }}</a></td>
+		</tr>
+		<tr>
+			<th scope="row">Flags</th>
+			<td>
+				<input id="flag-public" type="checkbox" name="public" disabled {% if work.public %}checked{% endif %}><label for="flag-public">Public</label>
+				<input id="flag-active" type="checkbox" name="active" disabled {% if work.active %}checked{% endif %}><label for="flag-active">Active</label>
+				<input id="flag-anonymous" type="checkbox" name="anonymous" disabled {% if work.anonymous %}checked{% endif %}><label for="flag-anonymous">Anonymous</label>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row">File</th>
+			{% if work.filename %}
+			<td><a class="filename" href="{{url_for(".file", filename=work.filename)}}">{{ work.filename }}</a></td>
+			{% else %}
+			<td>None</td>
+			{% endif %}
+		</tr>
+	</table>
+	{% if not work.text %}
+	<p>
+	This work has no raw text. Check the file.
+	</p>
+	{% else %}
+	<article class="work-text"><details><summary>View text</summary>{{ work.text }}</details></article>
+	{% endif %}
+	<form method="POST">
+		<table>
+			{# TODO #}
+		<input type="submit" value="Submit" />
+		</table>
+	</form>
+</main>
+{% endblock %}
+{% block final_script %}
+{% endblock %}

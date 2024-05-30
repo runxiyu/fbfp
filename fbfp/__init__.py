@@ -124,7 +124,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
 
     # FIXME: Typing is broken because of how I typed login_required
     #        https://todo.sr.ht/~runxiyu/fbfp/6
-    @bp.route("/work/<int:id>", methods=["GET", "POST"])  # type: ignore
+    @bp.route("/work/<int:id>", methods=["GET"])  # type: ignore
     @login_required
     def work(context: context_t, id: int) -> response_t:
         user = ensure_user(context)
@@ -132,26 +132,32 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             (not work.public) and (work.user is not user)
         ):
             raise nope(404, "Submission %d does not exist or is private" % id)
-        if flask.request.method == "POST":
-            updated = True
-            if work.user is not user:
-                raise nope(403, "You are not authorized to update another user's work.")
-
-            work.anonymous = flask.request.form.get("anonymous", None) != None
-            work.public = flask.request.form.get("public", None) != None
-            work.active = flask.request.form.get("active", None) != None
-
-            db.session.flush()
-            db.session.refresh(work)
-            db.session.commit()
-        else:
-            updated = False
 
         return flask.Response(
             flask.render_template(
-                "work.html", user=user, fbfpc=fbfpc(), work=work, updated=updated
+                "work.html", user=user, fbfpc=fbfpc(), work=work
             )
         )
+
+    @bp.route("/work/<int:id>/update", methods=["POST"])  # type: ignore
+    @login_required
+    def work_update(context: context_t, id: int) -> response_t:
+        user = ensure_user(context)
+
+        if (not (work := db.session.get(models.Work, id))) or (work.user is not user):
+            raise nope(403, "You cannot update nonexistant work or others' work.")
+
+        work.anonymous = flask.request.form.get("anonymous", None) != None
+        work.public = flask.request.form.get("public", None) != None
+        work.active = flask.request.form.get("active", None) != None
+
+        db.session.flush()
+        db.session.refresh(work)
+        db.session.commit()
+
+        flask.flash("Flags updated successfully.")
+        
+        return flask.redirect(flask.url_for(".work", id=work.id))
 
     @bp.route("/work/<int:id>/delete", methods=["GET", "POST"])  # type: ignore
     @login_required
@@ -197,7 +203,20 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             flask.flash("Deleted #%d" % id)
             return flask.redirect(flask.url_for(".index"))
 
-    @bp.route("/list", methods=["GET"])
+    @bp.route("/work/<int:id>/comment")  # type: ignore # FIXME
+    @login_required
+    def work_comment(context: context_t, id: int) -> response_t:
+        user = ensure_user(context)
+        if (not (work := db.session.get(models.Work, id))) or (
+            (not work.public) and (work.user is not user)
+        ):
+            raise nope(404, "Submission %d does not exist or is private" % id)
+        if flask.request.method == "POST":
+            return flask.request.form
+        return flask.Response(flask.render_template("work_comment.html", user=user, fbfpc=fbfpc(), work=work))
+                
+
+    @bp.route("/list", methods=["GET", "POST"])
     @login_required
     def list_(context: context_t) -> response_t:
         user = ensure_user(context)

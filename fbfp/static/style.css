@@ -250,7 +250,7 @@ form:not([class="plain"]) button {
 	font-weight: bold;
 }
 
-.btn-default, input[type=file]::file-selector-button {
+.btn-normal, input[type=file]::file-selector-button {
 	background: var(--boxbg);
 	border: var(--border) 1px solid !important;
 	color: var(--boxfg);
@@ -357,4 +357,8 @@ form.dialogue {
 
 table#flashes {
 	margin-bottom: 0rem;
+}
+
+#main-actions {
+	margin-top: 1.5rem;
 }

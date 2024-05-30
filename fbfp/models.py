@@ -43,6 +43,9 @@ class Work(database.db.Model):  # type: ignore
     active = mapped_column(Boolean, unique=False)
     oid = mapped_column(ForeignKey("fbfp_users.oid"))
     user: Mapped["User"] = relationship(back_populates="works")
+    whole_work_comments: Mapped[List["WholeWorkComment"]] = relationship(
+        back_populates="work"
+    )
 
     def __init__(
         self,
@@ -65,3 +68,15 @@ class Work(database.db.Model):  # type: ignore
         else:
             self.filename = None
         self.anonymous, self.public, self.active = anonymous, public, active
+
+
+class WholeWorkComment(database.db.Model):  # type: ignore
+    __tablename__ = "fbfp_wwcomments"
+    __table_args__ = {"sqlite_autoincrement": True}
+    id = mapped_column(Integer, primary_key=True)
+    wid = mapped_column(ForeignKey("fbfp_works.id"))
+    work: Mapped["Work"] = relationship(back_populates="whole_work_comments")
+    anonymous = mapped_column(Boolean, unique=False)
+    public = mapped_column(Boolean, unique=False)
+    filename = mapped_column(String(255), unique=True)
+    text = mapped_column(String, unique=False)
