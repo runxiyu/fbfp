@@ -180,6 +180,17 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                         first=False,
                     )
                 )
+            if work.filename:
+                try:
+                    if not (
+                        full_path := werkzeug.security.safe_join(
+                            fbfpc()["upload_path"], work.filename
+                        )
+                    ):
+                        raise FileNotFoundError
+                    os.remove(full_path)
+                except FileNotFoundError:
+                    flask.flash("WARNING: file not found")
             db.session.delete(work)
             db.session.flush()
             db.session.commit()
