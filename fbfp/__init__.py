@@ -151,7 +151,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                     "active": w.active,
                 }
                 for w in target.works
-                if w.public  # TODO: Not sure if this is efficient
+                if w.public or target is user # TODO: Not sure if this is efficient
             ],
         }
 
