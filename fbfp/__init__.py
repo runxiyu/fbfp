@@ -151,7 +151,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                     "active": w.active,
                 }
                 for w in target.works
-                if w.public or target is user # TODO: Not sure if this is efficient
+                if w.public or target is user  # TODO: Not sure if this is efficient
             ],
         }
 
@@ -193,6 +193,8 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         else:
             local_filename = None
 
+        text: typing.Optional[str]
+
         try:
             title = flask.request.form["title"]
             text = flask.request.form["text"]
@@ -202,11 +204,13 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         if not title.strip():
             raise nope(400, "You didn't include a title.")
 
-        if not (text.strip() or local_filename):
-            raise nope(
-                400,
-                "Your submission is basically empty. You need to upload a file or insert some text.",
-            )
+        if not (text.strip()):
+            if not local_filename:
+                raise nope(
+                    400,
+                    "Your submission is basically empty. You need to upload a file or insert some text.",
+                )
+            text = None
 
         anonymous = flask.request.form.get("anonymous", None) != None
         public = flask.request.form.get("public", None) != None

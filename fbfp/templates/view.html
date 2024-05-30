@@ -80,6 +80,13 @@
 			{% endif %}
 		</tr>
 	</table>
+	{% if not work.text %}
+	<p>
+	This work has no raw text. Check the file.
+	</p>
+	{% else %}
+	<article class="work-text">{{ work.text }}</article>
+	{% endif %}
 </main>
 </body>
 </html>
