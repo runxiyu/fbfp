@@ -129,6 +129,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         ):
             raise nope(404, "Submission %d does not exist or is private" % id)
         if flask.request.method == "POST":
+            updated = True
             if work.user is not user:
                 raise nope(403, "You are not authorized to update another user's work.")
 
@@ -139,9 +140,13 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             db.session.flush()
             db.session.refresh(work)
             db.session.commit()
+        else:
+            updated = False
 
         return flask.Response(
-            flask.render_template("work.html", user=user, fbfpc=fbfpc(), work=work)
+            flask.render_template(
+                "work.html", user=user, fbfpc=fbfpc(), work=work, updated=updated
+            )
         )
 
     @bp.route("/list", methods=["GET"])
