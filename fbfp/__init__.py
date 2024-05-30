@@ -18,6 +18,7 @@ import datetime
 import zoneinfo
 import functools
 
+import humanize
 import jinja2
 import flask
 import werkzeug
@@ -26,12 +27,9 @@ import werkzeug.middleware.proxy_fix
 
 from .database import db
 from . import models
+from .types import *
+from .exceptions import *
 
-context_t = dict[str, typing.Any]
-response_t: typing.TypeAlias = typing.Union[werkzeug.Response, flask.Response, str]
-login_required_t: typing.TypeAlias = typing.Callable[
-    [typing.Callable[[context_t], response_t]], typing.Callable[[], response_t]
-]
 
 VERSION = """fbfp v0.1
 
@@ -43,7 +41,7 @@ def no_login_required(
     f: typing.Callable[[context_t], response_t]
 ) -> typing.Callable[[], response_t]:
     @functools.wraps(f)
-    def wrapper() -> response_t:
+    def wrapper(*args: Any, **kwargs: Any) -> response_t:
         context = {
             "user": {
                 "name": "Test User",
@@ -51,7 +49,7 @@ def no_login_required(
                 "oid": "00000000-0000-0000-0000-000000000000",
             }
         }
-        return f(context)
+        return f(context, *args, **kwargs)
 
     return wrapper
 
@@ -72,6 +70,17 @@ def ensure_user(context: context_t) -> models.User:
     db.session.add(user)
     db.session.commit()
     return user
+
+
+def fbfpc_init(app: flask.Flask) -> None:
+    max_request_size = app.config["FBFPC"]["max_request_size"]
+    app.config["FBFPC"]["max_request_size_human"] = humanize.naturalsize(
+        max_request_size, binary=True
+    )
+    max_file_size = app.config["FBFPC"]["max_file_size"]
+    app.config["FBFPC"]["max_file_size_human"] = humanize.naturalsize(
+        max_file_size, binary=True
+    )
 
 
 def fbfpc() -> typing.Any:
@@ -96,8 +105,82 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         return flask.send_from_directory(fbfpc()["static_dir"], filename)
 
     @bp.route("/me", methods=["GET"])
-    def me() -> response_t:
+    @login_required
+    def me(context: context_t) -> response_t:
+        user = ensure_user(context)
         return flask.Response("")
+
+    # FIXME: Typing is broken because of how I typed login_required
+    #        https://todo.sr.ht/~runxiyu/fbfp/6
+    @bp.route("/view/<int:wid>", methods=["GET"])  # type: ignore
+    @login_required
+    def view(context: context_t, wid: int) -> response_t:
+        user = ensure_user(context)
+        if not (work := db.session.get(models.Work, wid)):
+            raise nope(
+                404, "Submission %d does not exist" % wid
+            )  # TODO: also inaccessible ones
+        return {"wid": work.wid, "title": work.title, "text": work.text}  # type: ignore
+
+    @bp.route("/new", methods=["GET", "POST"])
+    @login_required
+    def new(context: context_t) -> response_t:
+        user = ensure_user(context)
+        if flask.request.method == "GET":
+            return flask.Response(
+                flask.render_template("new.html", user=user, fbfpc=fbfpc())
+            )
+        form_file = flask.request.files["file"]
+        if filename := form_file.filename:
+            if (
+                shutil.disk_usage(fbfpc()["upload_path"]).free
+                < fbfpc()["require_free_space"]
+            ):
+                raise nope(
+                    500,
+                    "The server does not have enough free space to safely store uploads.",
+                )
+            filename_base, filename_ext = os.path.splitext(os.path.basename(filename))
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                suffix=filename_ext,
+                prefix=filename_base + ".",
+                dir=fbfpc()["upload_path"],
+                delete=False,
+            ) as fd:
+                local_filename = fd.name
+                form_file.save(local_filename)
+        else:
+            local_filename = None
+
+        try:
+            title = flask.request.form["title"]
+            text = flask.request.form["text"]
+        except KeyError as e:
+            raise nope(400, "Form does not include %s" % e.args[0])
+
+        if not (text.strip() or local_filename):
+            raise nope(
+                400,
+                "Your submission is basically empty. You need to upload a file or insert some text.",
+            )
+
+        work = models.Work(
+            user=user,
+            title=title,
+            text=text,
+            filename=os.path.basename(local_filename) if local_filename else None,
+        )
+
+        db.session.add(work)
+        db.session.flush()
+        db.session.refresh(work)
+        db.session.commit()
+
+        wid = work.wid
+        assert type(wid) is int
+
+        return flask.redirect(flask.url_for(".view", wid=wid))
 
     return bp
 
@@ -109,8 +192,26 @@ def make_app(login_required: login_required_t, **config: typing.Any) -> flask.Ap
     )
     app.register_blueprint(make_bp(login_required), url_prefix="/")
     app.config.update(**config)
+    fbfpc_init(app)
     app.jinja_env.undefined = jinja2.StrictUndefined
     db.init_app(app)
+
+    @app.errorhandler(nope)
+    def handle_nope(
+        exc: nope,
+    ) -> response_t:
+        tb = "".join(traceback.format_exception(exc, chain=True))
+        return flask.Response(
+            flask.render_template(
+                "nope.html",
+                msg=exc.args[1],
+                error=tb,
+                errver=VERSION,
+                fbfpc=fbfpc(),
+            ),
+            status=exc.args[0],
+        )
+
     with app.app_context():
         db.create_all()
     return app
@@ -120,7 +221,15 @@ def make_debug_app() -> flask.App:
     app = make_app(
         login_required=no_login_required,
         SQLALCHEMY_DATABASE_URI="sqlite:///test.db",
-        FBFPC={"site_title": "FBFP Testing", "static_dir": "fbfp/static"},
+        FBFPC={
+            "site_title": "FBFP Testing",
+            "static_dir": "fbfp/static",
+            "max_request_size": 3145728,  # not enforced here; should be enforced by nginx
+            "max_file_size": 3000000,
+            "upload_path": "uploads",
+            "require_free_space": 3 * 1024 * 1024 * 1024,
+        },
     )
     assert app.config["DEBUG"] == True
+
     return app

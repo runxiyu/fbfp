@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+{# This comment makes vim detect the filetype correctly #}
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Error &ndash; {{ fbfpc["site_title"] }}</title>
+	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
+<style>
+p#errmsg {
+	font-weight: bold;
+}
+pre#errtb {
+	background-color: rgb(255, 220, 220);
+}
+pre#errver {
+	background-color: rgb(235, 235, 235);
+}
+header {
+	background-color: rgb(255, 0, 0);
+}
+</style>
+</head>
+<body>
+<header>
+	<div class="header-content">
+		<div class="header-left">
+			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
+		</div>
+		<div class="header-right">
+			{# <p><a href="{{ url_for(".me") }}">{{ user.name }}</a></p> #}
+		</div>
+	</div>
+</header>
+<main>
+<p>
+I cannot handle your request because of an error:
+</p>
+{% if msg %}
+<p id="errmsg">
+{{ msg }}
+</p>
+{% endif %}
+{% if error %}
+<p>
+Here is the traceback:
+</p>
+<pre id="errtb">{{error}}</pre>
+{% endif %}
+<p>
+If you believe that this is an error in this web service, please contact the administrator at <a href="mailto:ykps@runxiyu.org"><code>ykps@runxiyu.org</code></a> with a copy of the above information.
+</p>
+<p>
+If you are a technical user, you may want to view the source code of this website's backend to figure out what's going on, and file a bug report. {% if errver %}The following versioning information may be useful:{% endif %}
+</p>
+{% if errver %}
+<pre id="errver">{{errver}}</pre>
+{% endif %}
+</main>
+</body>
+</html>

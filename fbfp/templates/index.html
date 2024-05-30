@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>FBFP</title>
+	<title>{{ fbfpc["site_title"] }}</title>
 	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
 	<style>
 	.tp-columns {
@@ -39,6 +39,9 @@
 <main class="tp-columns">
 	<div id="yours">
 		<h2>Your work</h2>
+		<p>
+		<a class="btn-primary btn" href="{{ url_for(".new") }}">New</a>
+		</p>
 		{% if wyours %}
 		<table>
 			<tr>

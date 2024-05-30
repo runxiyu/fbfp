@@ -1,16 +1,17 @@
-from sqlalchemy import Integer, String, Boolean
-from sqlalchemy.orm import mapped_column, relationship
-from typing import Optional
+from sqlalchemy import Integer, String, Boolean, ForeignKey
+from sqlalchemy.orm import mapped_column, relationship, Mapped
+from typing import Optional, List
 from . import database
 
 
 class User(database.db.Model):  # type: ignore
     __tablename__ = "fbfp_users"
     oid = mapped_column(String(36), primary_key=True)  # UUID
-    name = mapped_column(String(50), unique=False)
-    email = mapped_column(String(120), unique=True)
+    name = mapped_column(String(80), unique=False)
+    email = mapped_column(String(80), unique=True)
     can_submit = mapped_column(Boolean, unique=False)
     can_feedback = mapped_column(Boolean, unique=False)
+    works: Mapped[List["Work"]] = relationship(back_populates="user")
 
     def __init__(
         self,
@@ -28,3 +29,27 @@ class User(database.db.Model):  # type: ignore
 
     def __repr__(self) -> str:
         return f"<User oid={self.oid!r} email={self.email!r}>"
+
+
+class Work(database.db.Model):  # type: ignore
+    __tablename__ = "fbfp_works"
+    wid = mapped_column(Integer, primary_key=True)
+    title = mapped_column(String(255), unique=False)
+    text = mapped_column(String, unique=False)
+    filename = mapped_column(String(255), unique=True)
+    oid = mapped_column(ForeignKey("fbfp_users.oid"))
+    user: Mapped["User"] = relationship(back_populates="works")
+
+    def __init__(
+        self, user: User, title: str, text: Optional[str], filename: Optional[str]
+    ) -> None:
+        self.user = user
+        self.title = title
+        if text:
+            self.text = text
+        else:
+            self.text = None
+        if filename:
+            self.filename = filename
+        else:
+            self.filename = None

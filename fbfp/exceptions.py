@@ -1,0 +1,2 @@
+class nope(Exception):
+    pass

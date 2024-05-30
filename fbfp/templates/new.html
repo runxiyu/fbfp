@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+{# This comment makes vim detect the filetype correctly #}
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>New &ndash; {{ fbfpc["site_title"] }}</title>
+	<link rel="stylesheet" href="{{ url_for(".static", filename="style.css") }}" />
+</head>
+<body>
+<header>
+	<div class="header-content">
+		<div class="header-left">
+			<h1><a href="/">{{ fbfpc["site_title"] }}</a></h1>
+		</div>
+		<div class="header-right">
+			<p><a href="{{ url_for(".me") }}">{{ user.name }}</a></p>
+		</div>
+	</div>
+</header>
+<main class="tp-columns">
+	<form id="form-new" method="POST" enctype="multipart/form-data">
+		<div class="formgroup">
+			{#
+			<label for="title"><strong>Title</strong></label>
+			<br/>
+			#}
+		</div>
+
+		<table class="capline">
+			<caption style="display: none;">
+				Submit
+			</caption>
+			<tr>
+				<th colspan="2">
+					Submit a work for peer feedback
+				</th>
+			</tr>
+			<tr>
+				<th scope="row">Title</th>
+				<td class="tdinput">
+					<input id="title" name="title" placeholder="Title" type="text" />
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="text">Either</label></th>
+				<td class="tdinput">
+					<textarea style="min-height: 15ex;" id="text" name="text" placeholder="Paste your work here"></textarea><br/>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="fileupload">Or</label></th>
+				<td class="flex-justify">
+					<div class="left">
+						<input title="" value="" type="file" id="fileupload" name="file" />
+					</div>
+					<div class="right">
+						<span class="greyedout">Max {{ fbfpc["max_file_size_human"] }}</span>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="th-like" colspan=2>
+					<div class="flex-justify">
+						<div class="left">
+							<input type="submit" value="Submit" />
+						</div>
+						<div class="right">
+							<span class="greyedout">Max {{ fbfpc["max_request_size_human"] }}</span>
+						</div>
+					</div>
+				</td>
+			</tr>
+		<table>
+	</form>
+</main>
+<script>
+	/* SPDX-License-Identifier: CC0-1.0 */
+	const uploadField = document.getElementById("fileupload");
+	uploadField.onchange = function() {
+		if(this.files[0].size > {{ fbfpc["max_file_size"] }}) {
+			alert("File exceeds {{ fbfpc["max_file_size_human"] }}. Either submit a smaller file, or use a file hosting service and submit the URL.");
+			this.value = "";
+		}
+	};
+</script>
+</body>
+</html>

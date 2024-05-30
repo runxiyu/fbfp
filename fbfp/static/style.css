@@ -1,9 +1,16 @@
 :root {
 	--theme: #0062cc;
+	--theme-contrast: #ffffff;
 	--border: rgb(180, 180, 180);
+	--greyedout: rgb(180, 180, 180);
 	--boxbg: rgb(235, 235, 235);
+	--boxfg: #000000;
 	--rowbg-even: #ffffff;
 	--rowbg-odd: #fcfcfc;
+}
+
+.greyedout {
+	color: var(--greyedout) !important;
 }
 
 html {
@@ -101,7 +108,7 @@ th {
 
 th[scope~="row"] {
 	width: 6em;
-	/* text-align: right; */
+	text-align: right;
 }
 
 th[scope~="col"] {
@@ -111,10 +118,13 @@ th[scope~="col"] {
 td {
 	border: 1px solid;
 	text-align: left;
-	padding: 0px 3.0.4em;
 	height: 1.25rem;
 	border: 1px solid var(--border);
 	padding: 3px 5px;
+}
+
+td.th-like {
+	background-color: var(--boxbg) !important;
 }
 
 td.min {
@@ -130,6 +140,8 @@ tr:nth-child(even) td {
 tr:nth-child(odd) td {
   background-color: var(--rowbg-odd);
 }
+
+/*
 
 form:not([class="plain"]) {
 	margin-top: 0.4em;
@@ -178,3 +190,88 @@ form:not([class="plain"]) button {
 	margin-left: 0.5em;
 }
 
+*/
+
+.btn-primary, input[type=submit] {
+	background: var(--theme);
+	color: var(--theme-contrast);
+	border: var(--border) 1px solid;
+}
+
+.btn-default, input[type=file]::file-selector-button {
+	background: var(--boxbg);
+	border: var(--border) 1px solid !important;
+	color: var(--boxfg);
+}
+
+.btn, input[type=submit], input[type=file]::file-selector-button {
+	display: inline-block;
+	/* width: 100%; */
+	width: auto;
+	min-width: fit-content;
+	border-radius: 0;
+	padding: .1rem .75rem;
+	font-size: 0.9rem;
+	transition: background .1s linear;
+	border: none;
+	cursor: pointer;
+}
+
+div.formgroup + div.formgroup {
+	margin-top: 1rem;
+}
+
+textarea {
+	box-sizing: border-box;
+	background-color: var(--boxbg);
+	resize: vertical;
+}
+textarea, input[type=text] {
+	font-family: sans-serif;
+	font-size: smaller;
+	background-color: var(--boxbg);
+	border: none;
+	padding: 0.3rem;
+	width: 100%;
+	box-sizing: border-box;
+}
+td.tdinput {
+	padding: 0rem;
+}
+td.tdinput textarea, td.tdinput input[type=text] {
+	padding: 3px 5px;
+	background-color: inherit !important;
+}
+
+/* not sure how to make these lengths dynamic */
+
+.multicols {
+	display: flex;
+	flex-direction: row;
+	@media(max-width: 40rem) {
+		flex-wrap: wrap;
+	}
+	gap: 1rem;
+	align-items: stretch;
+}
+
+.multicols div {
+	min-width: 15em;
+	max-width: 40rem;
+	width: 100%;
+	margin: auto;
+}
+
+.flex-justify {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0 auto;
+	border: none;
+}
+
+pre {
+	background-color: rgb(240, 240, 240);
+	padding: 0.3rem;
+	overflow-x: scroll;
+}

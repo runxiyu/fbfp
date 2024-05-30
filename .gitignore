@@ -4,3 +4,4 @@ venv
 build
 COMMIT_EDITMSG
 instance
+uploads/
