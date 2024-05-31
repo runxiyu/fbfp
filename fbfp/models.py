@@ -11,9 +11,9 @@ class User(database.db.Model):  # type: ignore
     email = mapped_column(String, unique=True)
     can_submit = mapped_column(Boolean, unique=False)
     can_feedback = mapped_column(Boolean, unique=False)
-    works: Mapped[List["Work"]] = relationship(back_populates="user")
+    works: Mapped[List["Work"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     whole_work_comments: Mapped[List["WholeWorkComment"]] = relationship(
-        back_populates="user"
+        back_populates="user", cascade="all, delete-orphan"
     )
 
     def __init__(
@@ -47,7 +47,7 @@ class Work(database.db.Model):  # type: ignore
     oid = mapped_column(ForeignKey("fbfp_users.oid"))
     user: Mapped["User"] = relationship(back_populates="works")
     whole_work_comments: Mapped[List["WholeWorkComment"]] = relationship(
-        back_populates="work"
+        back_populates="work", cascade="all, delete-orphan"
     )
 
     def __init__(
