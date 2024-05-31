@@ -134,9 +134,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             raise nope(404, "Submission %d does not exist or is private" % id)
 
         return flask.Response(
-            flask.render_template(
-                "work.html", user=user, fbfpc=fbfpc(), work=work
-            )
+            flask.render_template("work.html", user=user, fbfpc=fbfpc(), work=work)
         )
 
     @bp.route("/work/<int:id>/update", methods=["POST"])  # type: ignore
@@ -156,7 +154,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         db.session.commit()
 
         flask.flash("Flags updated successfully.")
-        
+
         return flask.redirect(flask.url_for(".work", id=work.id))
 
     @bp.route("/work/<int:id>/delete", methods=["GET", "POST"])  # type: ignore
@@ -212,7 +210,11 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         ):
             raise nope(404, "Submission %d does not exist or is private" % id)
         if flask.request.method == "GET":
-            return flask.Response(flask.render_template("work_comment_new.html", user=user, fbfpc=fbfpc(), work=work))
+            return flask.Response(
+                flask.render_template(
+                    "work_comment_new.html", user=user, fbfpc=fbfpc(), work=work
+                )
+            )
 
         form_file = flask.request.files["file"]
         if filename := form_file.filename:
@@ -278,7 +280,6 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         assert type(id) is int
 
         return flask.redirect(flask.url_for(".work_comment", id=id))
-                
 
     @bp.route("/list", methods=["GET", "POST"])
     @login_required

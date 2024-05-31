@@ -12,7 +12,9 @@ class User(database.db.Model):  # type: ignore
     can_submit = mapped_column(Boolean, unique=False)
     can_feedback = mapped_column(Boolean, unique=False)
     works: Mapped[List["Work"]] = relationship(back_populates="user")
-    whole_work_comments: Mapped[List["WholeWorkComment"]] = relationship(back_populates="user")
+    whole_work_comments: Mapped[List["WholeWorkComment"]] = relationship(
+        back_populates="user"
+    )
 
     def __init__(
         self,
