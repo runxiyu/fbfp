@@ -209,12 +209,21 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             (not work.public) and (work.user is not user)
         ):
             raise nope(404, "Work #%d does not exist or is private" % wid)
-        if (not (comment := db.session.get(models.WholeWorkComment, cid))) or (
-            (not comment.public) and (comment.user is not user) and (work.user is not user)
+        if (
+            (not (comment := db.session.get(models.WholeWorkComment, cid)))
+            or (
+                (not comment.public)
+                and (comment.user is not user)
+                and (work.user is not user)
+            )
+            or (comment.work is not work)
         ):
-            raise nope(404, "Comment #%d does not exist or is private" % wid)
+            raise nope(
+                404,
+                "Comment #%d does not exist, is private, or does not belong to this work"
+                % wid,
+            )
         return flask.Response(comment.text)
-
 
     @bp.route("/work/<int:wid>/comment/new", methods=["GET", "POST"])  # type: ignore # FIXME
     @login_required
