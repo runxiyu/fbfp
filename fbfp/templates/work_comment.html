@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titleprefix %}Comment #{{ comment.id }} on #{{ work.id }} {{ work.title }}{% endblock %}
+{% block titleprefix %}Comment #{{ comment.id }} on <a href="{{ url_for(".work", id=work.id) }}">#{{ work.id }} {{ work.title }}</a>{% endblock %}
 {% block extra_head %}
 {% endblock %}
 {% block main %}
