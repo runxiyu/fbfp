@@ -7,8 +7,8 @@ from . import database
 class User(database.db.Model):  # type: ignore
     __tablename__ = "fbfp_users"
     oid = mapped_column(String(36), primary_key=True)  # UUID
-    name = mapped_column(String(80), unique=False)
-    email = mapped_column(String(80), unique=True)
+    name = mapped_column(String, unique=False)
+    email = mapped_column(String, unique=True)
     can_submit = mapped_column(Boolean, unique=False)
     can_feedback = mapped_column(Boolean, unique=False)
     works: Mapped[List["Work"]] = relationship(back_populates="user")
@@ -38,7 +38,7 @@ class Work(database.db.Model):  # type: ignore
     __tablename__ = "fbfp_works"
     __table_args__ = {"sqlite_autoincrement": True}
     id = mapped_column(Integer, primary_key=True)
-    title = mapped_column(String(255), unique=False)
+    title = mapped_column(String, unique=False)
     text = mapped_column(String, unique=False)
     filename = mapped_column(String(255), unique=True)
     anonymous = mapped_column(Boolean, unique=False)
@@ -83,6 +83,7 @@ class WholeWorkComment(database.db.Model):  # type: ignore
     public = mapped_column(Boolean, unique=False)
     filename = mapped_column(String(255), unique=True)
     text = mapped_column(String, unique=False)
+    title = mapped_column(String, unique=False)
     oid = mapped_column(ForeignKey("fbfp_users.oid"))
     user: Mapped["User"] = relationship(back_populates="whole_work_comments")
 

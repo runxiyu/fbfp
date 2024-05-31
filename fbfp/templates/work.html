@@ -5,57 +5,86 @@
 {% block main %}
 <main>
 	<h2>{{work.title}}</h2>
+	{% if work.user.oid == user.oid %}
 	<form action="{{ url_for(".work_update", id=work.id) }}" method="POST">
-		<table>
-			<tr>
-				<th colspan=2>Information</th>
-			</tr>
-			<tr>
-				<th scope="row">ID</th>
-				<td>{{ work.id }}</td>
-			</tr>
-			{% if (not work.anonymous) or (work.user.oid == user.oid) %}
-			<tr>
-				<th scope="row">Author</th>
-				<td><a href="{{ url_for(".user", oid=work.user.oid) }}">{{ work.user.name }}</a></td>
-			</tr>
+	{% endif %}
+	<table>
+		<tr>
+			<th colspan=2>Information</th>
+		</tr>
+		<tr>
+			<th scope="row">ID</th>
+			<td>{{ work.id }}</td>
+		</tr>
+		{% if (not work.anonymous) or (work.user.oid == user.oid) %}
+		<tr>
+			<th scope="row">Author</th>
+			<td><a href="{{ url_for(".user", oid=work.user.oid) }}">{{ work.user.name }}</a></td>
+		</tr>
+		{% endif %}
+		<tr>
+			<th scope="row">Flags</th>
+			<td>
+				<input id="flag-public" type="checkbox" name="public" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.public %}checked{% endif %}><label for="flag-public">Public</label>
+				<input id="flag-active" type="checkbox" name="active" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.active %}checked{% endif %}><label for="flag-active">Active</label>
+				<input id="flag-anonymous" type="checkbox" name="anonymous" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.anonymous %}checked{% endif %}><label for="flag-anonymous">Anonymous</label>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row">File</th>
+			{% if work.filename %}
+			<td><a class="filename" href="{{url_for(".file", filename=work.filename)}}">{{ work.filename }}</a></td>
+			{% else %}
+			<td>None</td>
 			{% endif %}
-			<tr>
-				<th scope="row">Flags</th>
-				<td>
-					<input id="flag-public" type="checkbox" name="public" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.public %}checked{% endif %}><label for="flag-public">Public</label>
-					<input id="flag-active" type="checkbox" name="active" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.active %}checked{% endif %}><label for="flag-active">Active</label>
-					<input id="flag-anonymous" type="checkbox" name="anonymous" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.anonymous %}checked{% endif %}><label for="flag-anonymous">Anonymous</label>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row">File</th>
-				{% if work.filename %}
-				<td><a class="filename" href="{{url_for(".file", filename=work.filename)}}">{{ work.filename }}</a></td>
-				{% else %}
-				<td>None</td>
-				{% endif %}
-			</tr>
-			{% if work.user.oid == user.oid %}
-			<tr>
-				<td class="th-like" colspan=2>
-						<div class="flex-justify">
-							<div class="left">
-								<input type="submit" value="Update" />
-								<a class="btn btn-danger" href="{{ url_for(".work_delete", id=work.id) }}">Delete</a>
-							</div>
-							<div class="right">
-								<span class="greyedout">Max {{ fbfpc["max_request_size_human"] }}</span>
-							</div>
+		</tr>
+		{% if work.user.oid == user.oid %}
+		<tr>
+			<td class="th-like" colspan=2>
+					<div class="flex-justify">
+						<div class="left">
+							<input type="submit" value="Update" />
+							<a class="btn btn-danger" href="{{ url_for(".work_delete", id=work.id) }}">Delete</a>
 						</div>
-				</td>
-			</tr>
-			{% endif %}
-		</table>
+						<div class="right">
+							<span class="greyedout">Max {{ fbfpc["max_request_size_human"] }}</span>
+						</div>
+					</div>
+			</td>
+		</tr>
+		{% endif %}
+	</table>
+	{% if work.user.oid == user.oid %}
 	</form>
-	<div id="main-actions">
-		<a class="btn btn-normal" href="{{ url_for(".work_comment_new", wid=work.id) }}">Create a whole-work comment</a>
-	</div>
+	{% endif %}
+	<table class="just-margin-top">
+			<tr>
+				<th colspan=3>Whole-work Comments</th>
+			</tr>
+			<tr>
+				<th class="min" scope="col">ID</th>
+				<th class="min" scope="col">Author</th>
+				<th scope="col">Title</th>
+			</tr>
+			{% for comment in work.whole_work_comments %}
+			<tr>
+				<th scope="row" class="min">{{ comment.id }}</th>
+				{% if comment.anonymous %}
+				<td class="min anonymous">Anonymous</td>
+				{% else %}
+				<td class="min"><a href="{{ url_for(".user", oid=comment.user.oid) }}">{{ comment.user.name }}</a></td>
+				{% endif %}
+				<td><a href="{{ url_for(".work_comment", wid=work.id, cid=comment.id) }}">{{ comment.title }}</a></td>
+			</tr>
+			{% endfor %}
+			<tr>
+				<th colspan="3">
+					<div class="flex-justify">
+						<a class="btn btn-primary" href="{{ url_for(".work_comment_new", wid=work.id) }}">New</a>
+					</div>
+				</th>
+			</tr>
+		</table>
 	{% if not work.text %}
 	<p>
 	This work has no raw text. Check the file.

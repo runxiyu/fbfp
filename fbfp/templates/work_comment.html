@@ -1,53 +1,125 @@
 {% extends "base.html" %}
-{% block titleprefix %}{% if work.anonymous %}#{{ work.id }} {{ work.title }} by anonymous{% else %}#{{ work.id }} {{ work.title }} by {{ work.user.name }}{% endif %}{% endblock %}
+{% block titleprefix %}Comment #{{ comment.id }} on #{{ work.id }} {{ work.title }}{% endblock %}
 {% block extra_head %}
 {% endblock %}
 {% block main %}
 <main>
-	<h2>{{work.title}}</h2>
-	<form action="{{ url_for(".work_update", id=work.id) }}" method="POST">
-		<table>
-			<tr>
-				<th colspan=2>Work Information</th>
-			</tr>
-			<tr>
-				<th scope="row">ID</th>
-				<td>{{ work.id }}</td>
-			</tr>
-			{% if (not work.anonymous) or (work.user.oid == user.oid) %}
-			<tr>
-				<th scope="row">Author</th>
-				<td><a href="{{ url_for(".user", oid=work.user.oid) }}">{{ work.user.name }}</a></td>
-			</tr>
+	<h2>{{ self.titleprefix() }}</h2>
+	{# The inline blocks aren't the best way to do this because it'd fail #}
+	<div class="flex-children-top">
+		<div>
+			{% if work.user.oid == user.oid %}
+			<form method="POST" >
 			{% endif %}
-			<tr>
-				<th scope="row">Flags</th>
-				<td>
-					<input id="flag-public" type="checkbox" name="public" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.public %}checked{% endif %}><label for="flag-public">Public</label>
-					<input id="flag-active" type="checkbox" name="active" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.active %}checked{% endif %}><label for="flag-active">Active</label>
-					<input id="flag-anonymous" type="checkbox" name="anonymous" {% if work.user.oid != user.oid %}disabled{% endif %} {% if work.anonymous %}checked{% endif %}><label for="flag-anonymous">Anonymous</label>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row">File</th>
-				{% if work.filename %}
-				<td><a class="filename" href="{{url_for(".file", filename=work.filename)}}">{{ work.filename }}</a></td>
-				{% else %}
-				<td>None</td>
+			<table>
+				<tr>
+					<th colspan=2>Comment Information</th>
+				</tr>
+				<tr>
+					<th scope="row">ID</th>
+					<td>{{ comment.id }}</td>
+				</tr>
+				<tr>
+					<th scope="row">Title</th>
+					<td>{{ comment.title }}</td>
+				</tr>
+				<tr>
+					<th scope="row">Author</th>
+					<td><a href="{{ url_for(".user", oid=comment.user.oid) }}">{{ comment.user.name }}</a></td>
+				</tr>
+				<tr>
+					<th scope="row">Flags</th>
+					<td>
+						<input id="flag-comment-public" type="checkbox" name="public" {% if comment.user.oid != user.oid %}disabled{% endif %} {% if comment.public %}checked{% endif %}><label for="flag-comment-public">Public</label>
+						<input id="flag-comment-anonymous" type="checkbox" name="anonymous" {% if comment.user.oid != user.oid %}disabled{% endif %} {% if comment.anonymous %}checked{% endif %}><label for="flag-comment-anonymous">Anonymous</label>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">File</th>
+					{% if comment.filename %}
+					<td><a class="filename" href="{{url_for(".file", filename=comment.filename)}}">{{ comment.filename }}</a></td>
+					{% else %}
+					<td>None</td>
+					{% endif %}
+				</tr>
+				{% if work.user.oid == user.oid %}
+				<tr>
+					<td class="th-like" colspan=2>
+							<div class="flex-justify">
+								<div class="button-row">
+									<input type="submit" value="Update" />
+									<a class="btn btn-normal" href="{{ url_for(".work_comment_edit", wid=work.id, cid=comment.id) }}">Edit</a>
+									<a class="btn btn-danger" href="{{ url_for(".work_comment_delete", wid=work.id, cid=comment.id) }}">Delete</a>
+								</div>
+								<div>
+									<span class="greyedout">Max {{ fbfpc["max_request_size_human"] }}</span>
+								</div>
+							</div>
+					</td>
+				</tr>
 				{% endif %}
-			</tr>
-		</table>
-	</form>
-	<div id="main-actions">
-		<a class="btn btn-normal" href="{{ url_for(".work_comment_new", wid=work.id) }}">Create a whole-work comment</a>
+			</table>
+			{% if work.user.oid == user.oid %}
+			</form>
+			{% endif %}
+		</div>
+		<div>
+			<table>
+				<thead>
+					<tr>
+						<th colspan=2>Work Information</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th scope="row">ID</th>
+						<td>{{ work.id }}</td>
+					</tr>
+					<tr>
+						<th scope="row">Title</th>
+						<td><a href="{{ url_for(".work", id=work.id) }}">{{ work.title }}</a></td>
+					</tr>
+					<tr>
+						<th scope="row">Author</th>
+						<td><a href="{{ url_for(".user", oid=work.user.oid) }}">{{ work.user.name }}</a></td>
+					</tr>
+					<tr>
+						<th scope="row">Flags</th>
+						<td>
+							<input id="flag-public" type="checkbox" name="public" disabled {% if work.public %}checked{% endif %}><label for="flag-public">Public</label>
+							<input id="flag-active" type="checkbox" name="active" disabled {% if work.active %}checked{% endif %}><label for="flag-active">Active</label>
+							<input id="flag-anonymous" type="checkbox" name="anonymous" disabled {% if work.anonymous %}checked{% endif %}><label for="flag-anonymous">Anonymous</label>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">File</th>
+						{% if work.filename %}
+						<td><a class="filename" href="{{url_for(".file", filename=work.filename)}}">{{ work.filename }}</a></td>
+						{% else %}
+						<td>None</td>
+						{% endif %}
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
+
+	{% if not comment.text %}
+	<p>
+	This comment has no raw text. Check the file.
+	</p>
+	{% else %}
+	<article class="work-text">{{ comment.text }}</article>
+	{% endif %}
+	{#
 	{% if not work.text %}
 	<p>
 	This work has no raw text. Check the file.
 	</p>
 	{% else %}
-	<article class="work-text">{{ work.text }}</article>
+	<article class="work-text"><details><summary>View work text</summary>{{ work.text }}</details></article>
 	{% endif %}
+	#}
 </main>
 {% endblock %}
 {% block final_script %}

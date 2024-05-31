@@ -256,7 +256,7 @@ form:not([class="plain"]) button {
 	padding: .1rem .75rem;
 	font-size: 0.9rem;
 	transition: background .1s linear;
-	border: none;
+	/* border: none; */
 	cursor: pointer;
 }
 
@@ -319,6 +319,14 @@ td.tdinput textarea, td.tdinput input[type=text] {
 	border: none;
 }
 
+.button-row {
+	display: flex;
+	gap: 0.2rem;
+	justify-content: start;
+	align-items: center;
+	margin-right: 1rem;
+}
+
 pre {
 	background-color: rgb(240, 240, 240);
 	padding: 0.3rem;
@@ -352,4 +360,28 @@ table#flashes {
 
 #main-actions {
 	margin-top: 1.5rem;
+}
+
+section {
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+}
+
+.inline {
+	display: inline-block;
+}
+
+.flex-children-top {
+	display: flex;
+	gap: 1rem;
+	align-items: top;
+}
+.flex-children-top > * {
+	vertical-align: top;
+	display: block;
+	flex: none;
+}
+
+.just-margin-top {
+	margin-top: 1rem;
 }

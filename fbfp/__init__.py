@@ -24,8 +24,9 @@ import flask
 import werkzeug
 import werkzeug.security
 import werkzeug.middleware.proxy_fix
-
 from sqlalchemy import select
+from flask import url_for, Response, render_template, request
+
 from .database import db
 from . import models
 from .types import *
@@ -98,9 +99,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     @login_required
     def disclaimer(context: context_t) -> response_t:
         user = ensure_user(context)
-        return flask.Response(
-            flask.render_template("disclaimer.html", user=user, fbfpc=fbfpc())
-        )
+        return Response(render_template("disclaimer.html", user=user, fbfpc=fbfpc()))
 
     @bp.route("/", methods=["GET"])
     @login_required
@@ -108,8 +107,8 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         user = ensure_user(context)
         wyours = user.works
         wothers = list(db.session.query(models.Work).filter(models.Work.user != user).filter(models.Work.public == True))  # type: ignore # FIXME
-        return flask.Response(
-            flask.render_template(
+        return Response(
+            render_template(
                 "index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
             )
         )
@@ -133,8 +132,8 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         ):
             raise nope(404, "Work #%d does not exist or is private" % id)
 
-        return flask.Response(
-            flask.render_template("work.html", user=user, fbfpc=fbfpc(), work=work)
+        return Response(
+            render_template("work.html", user=user, fbfpc=fbfpc(), work=work)
         )
 
     @bp.route("/work/<int:id>/update", methods=["POST"])  # type: ignore
@@ -145,9 +144,9 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         if (not (work := db.session.get(models.Work, id))) or (work.user is not user):
             raise nope(403, "You cannot update nonexistant work or others' work.")
 
-        work.anonymous = flask.request.form.get("anonymous", None) != None
-        work.public = flask.request.form.get("public", None) != None
-        work.active = flask.request.form.get("active", None) != None
+        work.anonymous = request.form.get("anonymous", None) != None
+        work.public = request.form.get("public", None) != None
+        work.active = request.form.get("active", None) != None
 
         db.session.flush()
         db.session.refresh(work)
@@ -155,7 +154,13 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
 
         flask.flash("Flags updated successfully.")
 
-        return flask.redirect(flask.url_for(".work", id=work.id))
+        return flask.redirect(url_for(".work", id=work.id))
+
+    @bp.route("/work/<int:id>/edit", methods=["GET", "POST"])  # type: ignore # FIXME
+    @login_required
+    def work_edit(context: context_t, id: int) -> response_t:
+        user = ensure_user(context)
+        raise nope(501, "I haven't implemented this yet!")
 
     @bp.route("/work/<int:id>/delete", methods=["GET", "POST"])  # type: ignore
     @login_required
@@ -166,24 +171,17 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 403,
                 "You cannot delete a nonexistent work or one owned by someone else.",
             )
-        if flask.request.method == "GET":
-            return flask.Response(
-                flask.render_template(
-                    "work_delete.html", user=user, fbfpc=fbfpc(), work=work, first=True
-                )
+        if request.method == "GET":
+            return Response(
+                render_template("work_delete.html", user=user, fbfpc=fbfpc(), work=work)
             )
         else:
-            confirm = flask.request.form.get("confirm", None) != None
+            confirm = request.form.get("confirm", None) != None
             if not confirm:
-                return flask.Response(
-                    flask.render_template(
-                        "work_delete.html",
-                        user=user,
-                        fbfpc=fbfpc(),
-                        work=work,
-                        first=False,
-                    )
+                flask.flash(
+                    "You must check the confirmation box for the deletion to commence."
                 )
+                return flask.redirect(url_for(".work_delete", id=work.id))
             if work.filename:
                 try:
                     if not (
@@ -199,12 +197,25 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             db.session.flush()
             db.session.commit()
             flask.flash("Deleted #%d" % id)
-            return flask.redirect(flask.url_for(".index"))
+            return flask.redirect(url_for(".index"))
+
+    @bp.route("/work/<int:wid>/comment/<int:cid>/delete", methods=["GET", "POST"])  # type: ignore # FIXME
+    @login_required
+    def work_comment_delete(context: context_t, wid: int, cid: int) -> response_t:
+        user = ensure_user(context)
+        raise nope(501, "I haven't implemented this yet!")
+    @bp.route("/work/<int:wid>/comment/<int:cid>/edit", methods=["GET", "POST"])  # type: ignore # FIXME
+    @login_required
+    def work_comment_edit(context: context_t, wid: int, cid: int) -> response_t:
+        user = ensure_user(context)
+        raise nope(501, "I haven't implemented this yet!")
 
     @bp.route("/work/<int:wid>/comment/<int:cid>", methods=["GET", "POST"])  # type: ignore # FIXME
     @login_required
     def work_comment(context: context_t, wid: int, cid: int) -> response_t:
         user = ensure_user(context)
+        if request.method == "POST":
+            raise nope(501, "I haven't implemented this yet!")
         if (not (work := db.session.get(models.Work, wid))) or (
             (not work.public) and (work.user is not user)
         ):
@@ -223,7 +234,9 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 "Comment #%d does not exist, is private, or does not belong to this work"
                 % wid,
             )
-        return flask.Response(comment.text)
+        return Response(
+            render_template("work_comment.html", user=user, fbfpc=fbfpc(), work=work, comment=comment)
+        )
 
     @bp.route("/work/<int:wid>/comment/new", methods=["GET", "POST"])  # type: ignore # FIXME
     @login_required
@@ -233,14 +246,14 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             (not work.public) and (work.user is not user)
         ):
             raise nope(404, "Work #%d does not exist or is private" % wid)
-        if flask.request.method == "GET":
-            return flask.Response(
-                flask.render_template(
+        if request.method == "GET":
+            return Response(
+                render_template(
                     "work_comment_new.html", user=user, fbfpc=fbfpc(), work=work
                 )
             )
 
-        form_file = flask.request.files["file"]
+        form_file = request.files["file"]
         if filename := form_file.filename:
             if (
                 shutil.disk_usage(fbfpc()["upload_path"]).free
@@ -266,8 +279,8 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         text: typing.Optional[str]
 
         try:
-            title = flask.request.form["title"]
-            text = flask.request.form["text"]
+            title = request.form["title"]
+            text = request.form["text"]
         except KeyError as e:
             raise nope(400, "Form does not include %s" % e.args[0])
 
@@ -282,8 +295,8 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 )
             text = None
 
-        anonymous = flask.request.form.get("anonymous", None) != None
-        public = flask.request.form.get("public", None) != None
+        anonymous = request.form.get("anonymous", None) != None
+        public = request.form.get("public", None) != None
 
         comment = models.WholeWorkComment(
             user=user,
@@ -303,7 +316,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         cid = comment.id
         assert type(cid) is int
 
-        return flask.redirect(flask.url_for(".work_comment", wid=work.id, cid=cid))
+        return flask.redirect(url_for(".work_comment", wid=work.id, cid=cid))
 
     @bp.route("/list", methods=["GET", "POST"])
     @login_required
@@ -347,11 +360,9 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     @login_required
     def new(context: context_t) -> response_t:
         user = ensure_user(context)
-        if flask.request.method == "GET":
-            return flask.Response(
-                flask.render_template("new.html", user=user, fbfpc=fbfpc())
-            )
-        form_file = flask.request.files["file"]
+        if request.method == "GET":
+            return Response(render_template("new.html", user=user, fbfpc=fbfpc()))
+        form_file = request.files["file"]
         if filename := form_file.filename:
             if (
                 shutil.disk_usage(fbfpc()["upload_path"]).free
@@ -377,8 +388,8 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         text: typing.Optional[str]
 
         try:
-            title = flask.request.form["title"]
-            text = flask.request.form["text"]
+            title = request.form["title"]
+            text = request.form["text"]
         except KeyError as e:
             raise nope(400, "Form does not include %s" % e.args[0])
 
@@ -393,9 +404,9 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 )
             text = None
 
-        anonymous = flask.request.form.get("anonymous", None) != None
-        public = flask.request.form.get("public", None) != None
-        active = flask.request.form.get("active", None) != None
+        anonymous = request.form.get("anonymous", None) != None
+        public = request.form.get("public", None) != None
+        active = request.form.get("active", None) != None
 
         work = models.Work(
             user=user,
@@ -415,7 +426,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         id = work.id
         assert type(id) is int
 
-        return flask.redirect(flask.url_for(".work", id=id))
+        return flask.redirect(url_for(".work", id=id))
 
     return bp
 
@@ -438,8 +449,8 @@ def make_app(login_required: login_required_t, **config: typing.Any) -> flask.Ap
         exc: nope,
     ) -> response_t:
         tb = "".join(traceback.format_exception(exc, chain=True))
-        return flask.Response(
-            flask.render_template(
+        return Response(
+            render_template(
                 "nope.html",
                 msg=exc.args[1],
                 error=tb,
