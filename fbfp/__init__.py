@@ -204,6 +204,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     def work_comment_delete(context: context_t, wid: int, cid: int) -> response_t:
         user = ensure_user(context)
         raise nope(501, "I haven't implemented this yet!")
+
     @bp.route("/work/<int:wid>/comment/<int:cid>/edit", methods=["GET", "POST"])  # type: ignore # FIXME
     @login_required
     def work_comment_edit(context: context_t, wid: int, cid: int) -> response_t:
@@ -235,7 +236,13 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 % wid,
             )
         return Response(
-            render_template("work_comment.html", user=user, fbfpc=fbfpc(), work=work, comment=comment)
+            render_template(
+                "work_comment.html",
+                user=user,
+                fbfpc=fbfpc(),
+                work=work,
+                comment=comment,
+            )
         )
 
     @bp.route("/work/<int:wid>/comment/new", methods=["GET", "POST"])  # type: ignore # FIXME
@@ -480,6 +487,14 @@ def make_debug_app() -> flask.App:
         },
     )
     assert app.config["DEBUG"] == True
-    app.config["SECRET_KEY"] = "DEBUG_ONLY"
+    app.config.update(
+        {
+            "SECRET_KEY": "DEBUG_ONLY",  # change when in production
+            "SESSION_COOKIE_HTTPONLY": True,
+            "SESSION_COOKIE_SECURE": False,  # set to True in produciton
+            "SESSION_COOKIE_SAMESITE": "Lax",
+            "USE_X_SENDFILE": False,  # set to True in production
+        }
+    )
 
     return app
