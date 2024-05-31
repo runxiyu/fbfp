@@ -131,7 +131,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         if (not (work := db.session.get(models.Work, id))) or (
             (not work.public) and (work.user is not user)
         ):
-            raise nope(404, "Submission %d does not exist or is private" % id)
+            raise nope(404, "Work #%d does not exist or is private" % id)
 
         return flask.Response(
             flask.render_template("work.html", user=user, fbfpc=fbfpc(), work=work)
@@ -201,14 +201,29 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             flask.flash("Deleted #%d" % id)
             return flask.redirect(flask.url_for(".index"))
 
-    @bp.route("/work/<int:id>/comment/new", methods=["GET", "POST"])  # type: ignore # FIXME
+    @bp.route("/work/<int:wid>/comment/<int:cid>", methods=["GET", "POST"])  # type: ignore # FIXME
     @login_required
-    def work_comment_new(context: context_t, id: int) -> response_t:
+    def work_comment(context: context_t, wid: int, cid: int) -> response_t:
         user = ensure_user(context)
-        if (not (work := db.session.get(models.Work, id))) or (
+        if (not (work := db.session.get(models.Work, wid))) or (
             (not work.public) and (work.user is not user)
         ):
-            raise nope(404, "Submission %d does not exist or is private" % id)
+            raise nope(404, "Work #%d does not exist or is private" % wid)
+        if (not (comment := db.session.get(models.WholeWorkComment, cid))) or (
+            (not comment.public) and (comment.user is not user) and (work.user is not user)
+        ):
+            raise nope(404, "Comment #%d does not exist or is private" % wid)
+        return flask.Response(comment.text)
+
+
+    @bp.route("/work/<int:wid>/comment/new", methods=["GET", "POST"])  # type: ignore # FIXME
+    @login_required
+    def work_comment_new(context: context_t, wid: int) -> response_t:
+        user = ensure_user(context)
+        if (not (work := db.session.get(models.Work, wid))) or (
+            (not work.public) and (work.user is not user)
+        ):
+            raise nope(404, "Work #%d does not exist or is private" % wid)
         if flask.request.method == "GET":
             return flask.Response(
                 flask.render_template(
@@ -276,10 +291,10 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         db.session.refresh(comment)
         db.session.commit()
 
-        id = comment.id
-        assert type(id) is int
+        cid = comment.id
+        assert type(cid) is int
 
-        return flask.redirect(flask.url_for(".work_comment", id=id))
+        return flask.redirect(flask.url_for(".work_comment", wid=work.id, cid=cid))
 
     @bp.route("/list", methods=["GET", "POST"])
     @login_required
