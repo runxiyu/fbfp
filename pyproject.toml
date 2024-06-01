@@ -9,6 +9,7 @@ dependencies = [
     "sqlalchemy[mypy] >= 2.0.0",
     "humanize"
     "gunicorn[gevent]"
+    "mariadb"
 ]
 
 # vim: expandtab tabstop=4
