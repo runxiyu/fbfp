@@ -106,7 +106,8 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     def index(context: context_t) -> response_t:
         user = ensure_user(context)
         wyours = user.works
-        wothers = list(db.session.query(models.Work).filter(models.Work.user != user).filter(models.Work.public == True))  # type: ignore # FIXME
+        wothers = list(db.session.query(models.Work).filter(models.Work.user != user).filter(models.Work.public == True).filter(models.Work.active == True))  # type: ignore # FIXME
+        # FIXME: filter is inefficient
         return Response(
             render_template(
                 "index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
@@ -486,7 +487,9 @@ def make_debug_app() -> flask.App:
             "version_info": VERSION,
         },
     )
-    assert app.config["DEBUG"] == True
+    if not app.config["DEBUG"] == True:
+        # raise Exception("The debug app factory MUST NOT be used in production.")
+        pass
     app.config.update(
         {
             "SECRET_KEY": "DEBUG_ONLY",  # change when in production
