@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "fbfp_base.html" %}
 {% block titleprefix %}{% if work.anonymous %}#{{ work.id }} {{ work.title }} by anonymous{% else %}#{{ work.id }} {{ work.title }} by {{ work.user.name }}{% endif %}{% endblock %}
 {% block extra_head %}
 {% endblock %}

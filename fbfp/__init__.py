@@ -99,7 +99,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     @login_required
     def disclaimer(context: context_t) -> response_t:
         user = ensure_user(context)
-        return Response(render_template("disclaimer.html", user=user, fbfpc=fbfpc()))
+        return Response(render_template("fbfp_disclaimer.html", user=user, fbfpc=fbfpc()))
 
     @bp.route("/", methods=["GET"])
     @login_required
@@ -110,7 +110,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         # FIXME: filter is inefficient
         return Response(
             render_template(
-                "index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
+                "fbfp_index.html", user=user, fbfpc=fbfpc(), wyours=wyours, wothers=wothers
             )
         )
 
@@ -134,7 +134,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             raise nope(404, "Work #%d does not exist or is private" % id)
 
         return Response(
-            render_template("work.html", user=user, fbfpc=fbfpc(), work=work)
+            render_template("fbfp_work.html", user=user, fbfpc=fbfpc(), work=work)
         )
 
     @bp.route("/work/<int:id>/update", methods=["POST"])  # type: ignore
@@ -174,7 +174,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             )
         if request.method == "GET":
             return Response(
-                render_template("work_delete.html", user=user, fbfpc=fbfpc(), work=work)
+                render_template("fbfp_work_delete.html", user=user, fbfpc=fbfpc(), work=work)
             )
         else:
             confirm = request.form.get("confirm", None) != None
@@ -238,7 +238,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             )
         return Response(
             render_template(
-                "work_comment.html",
+                "fbfp_work_comment.html",
                 user=user,
                 fbfpc=fbfpc(),
                 work=work,
@@ -257,7 +257,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
         if request.method == "GET":
             return Response(
                 render_template(
-                    "work_comment_new.html", user=user, fbfpc=fbfpc(), work=work
+                    "fbfp_work_comment_new.html", user=user, fbfpc=fbfpc(), work=work
                 )
             )
 
@@ -369,7 +369,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
     def new(context: context_t) -> response_t:
         user = ensure_user(context)
         if request.method == "GET":
-            return Response(render_template("new.html", user=user, fbfpc=fbfpc()))
+            return Response(render_template("fbfp_new.html", user=user, fbfpc=fbfpc()))
         form_file = request.files["file"]
         if filename := form_file.filename:
             if (
@@ -459,7 +459,7 @@ def make_app(login_required: login_required_t, **config: typing.Any) -> flask.Ap
         tb = "".join(traceback.format_exception(exc, chain=True))
         return Response(
             render_template(
-                "nope.html",
+                "fbfp_nope.html",
                 msg=exc.args[1],
                 error=tb,
                 errver=VERSION,
