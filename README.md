@@ -7,7 +7,4 @@ because I don't have time to maintain a project that could be used by others.
 
 ## Errors
 
-* ```
-  sqlalchemy.exc.ArgumentError: Class '<class 'fbfp.models.User'>' already has a primary mapper defined. 
-  ```
-  Your Flask-SQLAlchemy is too old.
+* If you get `sqlalchemy.exc.ArgumentError: Class '<class 'fbfp.models.User'>' already has a primary mapper defined.`, then your Flask-SQLAlchemy is too old. Install according to `pyproject.toml` please.
