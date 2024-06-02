@@ -7,8 +7,8 @@ dependencies = [
     "flask",
     "Flask-SQLAlchemy >= 3.1.1",
     "sqlalchemy[mypy] >= 2.0.0",
-    "humanize"
-    "gunicorn[gevent]"
+    "humanize",
+    "gunicorn[gevent]",
     "mariadb"
 ]
 
