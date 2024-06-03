@@ -284,9 +284,6 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 # FIXME: Is this a race condition or does it violate file locking?
             form_file.save(local_filename)
             os.umask(oldmask)
-            # well apparently NamedTemporaryFile creates permissions that are
-            # stricter than what umask can control
-            os.chmod(local_filename, 0o644)
 
         else:
             local_filename = None
@@ -388,6 +385,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                     "The server does not have enough free space to safely store uploads.",
                 )
             filename_base, filename_ext = os.path.splitext(os.path.basename(filename))
+            oldmask = os.umask(0o022)
             with tempfile.NamedTemporaryFile(
                 mode="w",
                 suffix=filename_ext,
@@ -397,6 +395,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
             ) as fd:
                 local_filename = fd.name
                 form_file.save(local_filename)
+            os.umask(oldmask)
         else:
             local_filename = None
 
