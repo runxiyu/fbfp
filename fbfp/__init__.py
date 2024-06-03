@@ -284,7 +284,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 # FIXME: Is this a race condition or does it violate file locking?
             form_file.save(local_filename)
             os.umask(oldmask)
-            os.chmod(local_filename, "0o644")
+            os.chmod(local_filename, 0o644)
 
         else:
             local_filename = None
@@ -397,7 +397,7 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 local_filename = fd.name
                 form_file.save(local_filename)
             os.umask(oldmask)
-            os.chmod(local_filename, "0o644")
+            os.chmod(local_filename, 0o644)
         else:
             local_filename = None
 
