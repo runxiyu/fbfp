@@ -281,9 +281,13 @@ def make_bp(login_required: login_required_t) -> flask.Blueprint:
                 delete=False,
             ) as fd:
                 local_filename = fd.name
-                form_file.save(local_filename)
                 # FIXME: Is this a race condition or does it violate file locking?
+            form_file.save(local_filename)
             os.umask(oldmask)
+            # well apparently NamedTemporaryFile creates permissions that are
+            # stricter than what umask can control
+            os.chmod(local_filename, 0o644)
+
         else:
             local_filename = None
 
