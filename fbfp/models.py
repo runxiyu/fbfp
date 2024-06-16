@@ -12,6 +12,7 @@ class User(database.db.Model):  # type: ignore
     email = mapped_column(String(128), unique=True)
     can_submit = mapped_column(Boolean, unique=False)
     can_feedback = mapped_column(Boolean, unique=False)
+    is_admin = mapped_column(Boolean, unique=False)
     works: Mapped[List["Work"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
