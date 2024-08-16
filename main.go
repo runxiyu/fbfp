@@ -50,8 +50,16 @@ func main() {
 	config.Msal.Callback = *(config_with_pointers.Msal.Callback)
 
 	cred, err := confidential.NewCredFromSecret(config.Msal.Secret)
+	e(err)
 
-	_ = cred
+	confidential_client, err := confidential.New(
+		"https://login.microsoftonline.com/"+config.Msal.Tenant,
+		config.Msal.Client,
+		cred,
+	)
+	e(err)
+
+	_ = confidential_client
 
 	fmt.Println(config)
 }
