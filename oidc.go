@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 )
@@ -63,14 +62,36 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(405)
 		w.Write([]byte("Error: The OpenID Connect authorization endpoint only accepts POST requests.\n"))
+		return
 	}
-	eeee, err := io.ReadAll(req.Body)
+
+	err := req.ParseForm()
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(500)
-		w.Write([]byte("Error: Internal server error while reading from stream.\n"))
+		w.WriteHeader(400)
+		w.Write([]byte("Error: Malformed form data.\n"))
+		return
 	}
+
+	returned_error := req.PostFormValue("error")
+	if returned_error != "" {
+		returned_error_description := req.PostFormValue("error_description")
+		if returned_error_description == "" {
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(400)
+			w.Write([]byte(fmt.Sprintf("Error: The OpenID Connect remote returned an error %s, but did not provide an error_description.\n", returned_error)))
+			return
+		} else {
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(400)
+			w.Write([]byte(fmt.Sprintf("Error: The OpenID Connect remote returned an error.\n\n%s\n\n%s\n", returned_error, returned_error_description)))
+			return
+		}
+	}
+
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(200)
-	w.Write([]byte(eeee))
+	w.Write([]byte("Alright, for now.\n"))
+	return
+
 }
