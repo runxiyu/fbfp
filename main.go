@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"git.sr.ht/~emersion/go-scfg"
+	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 )
 
 var config_with_pointers struct {
@@ -47,6 +48,10 @@ func main() {
 	config.Msal.Tenant = *(config_with_pointers.Msal.Tenant)
 	config.Msal.Secret = *(config_with_pointers.Msal.Secret)
 	config.Msal.Callback = *(config_with_pointers.Msal.Callback)
+
+	cred, err := confidential.NewCredFromSecret(config.Msal.Secret)
+
+	_ = cred
 
 	fmt.Println(config)
 }
