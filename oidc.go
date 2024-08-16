@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var openid_configuration struct {
@@ -17,13 +19,7 @@ var openid_configuration struct {
 	UserinfoEndpoint                  string     `json:"userinfo_endpoint"`
 }
 
-type jose_header_t struct {
-	Typ string `json:"typ"`
-	Cty string `json:"cty"`
-	Alg string `json:"alg"`
-	X5t string `json:"x5t"`
-	Kid string `json:"kid"`
-}
+var openid_keys map[string]([]byte)
 
 /*
  * Fetch the OpenID Connect configuration. The endpoint specified in
@@ -46,6 +42,51 @@ func get_openid_config(endpoint string) {
 	}
 	err = json.NewDecoder(resp.Body).Decode(&openid_configuration)
 	e(err)
+
+	resp, err = http.Get(openid_configuration.JwksUri)
+	e(err)
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		log.Fatal(fmt.Sprintf(
+			"Got response code %d from JwksUri\n",
+			resp.StatusCode,
+		))
+	}
+	var jwks_response struct {
+		Keys [](struct {
+			// Kty string `json:"kty"`
+			Use string   `json:"use"`
+			Kid string   `json:"kid"`
+			N   string   `json:"n"`
+			X5c []string `json:"x5c"`
+		}) `json:"keys"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&jwks_response)
+	e(err)
+
+	openid_keys = make(map[string]([]byte))
+
+	for _, key := range jwks_response.Keys {
+		if key.Use == "sig" {
+			if len(key.X5c) != 1 {
+				log.Println("Encountered key with more than one x5c, strange!")
+				continue
+			}
+			// d, err := base64.StdEncoding.DecodeString(key.X5c[0])
+			d, err := base64.RawURLEncoding.DecodeString(key.N)
+			e(err)
+			openid_keys[key.Kid] = d
+		} else {
+			continue
+		}
+	}
+}
+
+func get_key_from_kid(kid string) []byte {
+	// TODO: Poll the keys endpoint if the key is not found, with rate
+	// limits, and wrapped with a mutex (makes more sense than channels
+	// here)
+	return openid_keys[kid]
 }
 
 func generate_authorization_url() string {
@@ -98,7 +139,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(400)
 			w.Write([]byte(fmt.Sprintf(
-				"Error: The OpenID Connect callback returned an error.\n\n%s\n\n%s\n",
+				"Error: The OpenID Connect callback returned an error:\n\n%s\n\n%s\n",
 				returned_error,
 				returned_error_description,
 			)))
@@ -106,34 +147,45 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	id_token := req.PostFormValue("id_token")
-	if id_token == "" {
+	id_token_string := req.PostFormValue("id_token")
+	if id_token_string == "" {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(400)
 		w.Write([]byte(fmt.Sprintf("Error: The OpenID Connect callback did not return an error, but no id_token was found.\n")))
 		return
 	}
 
-	id_token_split := strings.Split(id_token, ".")
-	if len(id_token_split) != 3 {
-		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: The JSON Web Token provided in id_token does not contain 3 fields separated by 2 '.'s. While it is technically valid for the signature part to be missing according to section 7.2 of RFC 7519, we do not accept unsigned JWTs. JWEs are not acceptable either.\n")))
-		return
-	}
-	jose_header_base64u, jwt_payload_base64u, jwt_signature_base64u := id_token_split[0], id_token_split[1], id_token_split[2]
-	jose_header_json, err := base64.RawURLEncoding.DecodeString(jose_header_base64u)
-	if err != nil {
-		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: Malformed base64url encoding of the JOSE header.\n")))
-		return
-	}
-	var jose_header jose_header_t
-	err = json.Unmarshal(jose_header_json, &jose_header)
+	token, err := jwt.Parse(
+		id_token_string,
+		func(token *jwt.Token) (interface{}, error) {
+			return get_key_from_kid(token.Header["kid"].(string)), nil
+		},
+	)
 
-	_ = jwt_payload_base64u
-	_ = jwt_signature_base64u
+	switch {
+	case token.Valid:
+		break
+	case errors.Is(err, jwt.ErrTokenMalformed):
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(400)
+		w.Write([]byte(fmt.Sprintf("Error: Malformed JWT token.\n")))
+		return
+	case errors.Is(err, jwt.ErrTokenSignatureInvalid):
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(400)
+		w.Write([]byte(fmt.Sprintf("Error: Invalid signature on JWT token.\n")))
+		return
+	case errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet):
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(400)
+		w.Write([]byte(fmt.Sprintf("Error: JWT token expired or not yet valid.\n")))
+		return
+	default:
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(400)
+		w.Write([]byte(fmt.Sprintf("Error: Funny JWT token.\n")))
+		return
+	}
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(200)

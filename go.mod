@@ -3,3 +3,5 @@ module git.sr.ht/~runxiyu/fbfp
 go 1.22.5
 
 require git.sr.ht/~emersion/go-scfg v0.0.0-20240128091534-2ae16e782082
+
+require github.com/golang-jwt/jwt/v5 v5.2.1

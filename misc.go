@@ -3,12 +3,11 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"log"
 )
 
 func e(e error) {
 	if e != nil {
-		log.Fatal(e)
+		panic(e)
 	}
 }
 
