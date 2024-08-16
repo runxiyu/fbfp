@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type openid_configuration_response_t struct {
+var openid_configuration struct {
 	AuthorizationEndpoint             string     `json:"authorization_endpoint"`
 	TokenEndpoint                     string     `json:"token_endpoint"`
 	TokenEndpointAuthMethodsSupported ([]string) `json:"token_endpoint_auth_methods_supported"`
@@ -24,8 +24,7 @@ type openid_configuration_response_t struct {
  * - https://login.microsoftonline.com/common
  * - https://accounts.google.com/.well-known/openid-configuration
  */
-func get_openid_config(endpoint string) openid_configuration_response_t {
-	var o openid_configuration_response_t
+func get_openid_config(endpoint string) {
 	resp, err := http.Get(endpoint + "/.well-known/openid-configuration")
 	e(err)
 	defer resp.Body.Close()
@@ -35,13 +34,11 @@ func get_openid_config(endpoint string) openid_configuration_response_t {
 			resp.StatusCode,
 		))
 	}
-	err = json.NewDecoder(resp.Body).Decode(&o)
+	err = json.NewDecoder(resp.Body).Decode(&openid_configuration)
 	e(err)
-	return o
 }
 
 func generate_authorization_url(
-	authorization_endpoint string,
 	client_id string,
 	redirect_uri string,
 ) string {
@@ -55,7 +52,7 @@ func generate_authorization_url(
 	nonce := random(30)
 	return fmt.Sprintf(
 		"%s?client_id=%s&response_type=id_token&redirect_uri=%s&response_mode=form_post&scope=openid&nonce=%s",
-		authorization_endpoint,
+		openid_configuration.AuthorizationEndpoint,
 		config.Openid.Client,
 		config.Openid.RedirectUri,
 		nonce,
