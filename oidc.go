@@ -39,3 +39,25 @@ func get_openid_config(endpoint string) openid_configuration_response_t {
 	e(err)
 	return o
 }
+
+func generate_authorization_url(
+	authorization_endpoint string,
+	client_id string,
+	redirect_uri string,
+) string {
+	/*
+	 * TODO: Handle nonces and anti-replay. Incremental nonces would be
+	 * nice on memory and speed (depending on how maps are implemented in
+	 * Go, hopefully it's some sort of btree), but that requires either
+	 * hacky atomics or having a multiple goroutines to handle
+	 * authentication, neither of which are desirable.
+	 */
+	nonce := random(30)
+	return fmt.Sprintf(
+		"%s?client_id=%s&response_type=id_token&redirect_uri=%s&response_mode=form_post&scope=openid&nonce=%s",
+		authorization_endpoint,
+		config.Openid.Client,
+		config.Openid.RedirectUri,
+		nonce,
+	)
+}
