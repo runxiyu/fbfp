@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 
@@ -15,10 +16,11 @@ var config_with_pointers struct {
 		Bind *string `scfg:"bind"`
 	} `scfg:"listen"`
 	Msal struct {
-		Client   *string `scfg:"client"`
-		Tenant   *string `scfg:"tenant"`
-		Secret   *string `scfg:"secret"`
-		Callback *string `scfg:"callback"`
+		Client   *string     `scfg:"client"`
+		Tenant   *string     `scfg:"tenant"`
+		Secret   *string     `scfg:"secret"`
+		Callback *string     `scfg:"callback"`
+		Scopes   *([]string) `scfg:"scopes"`
 	} `scfg:"msal"`
 }
 
@@ -32,6 +34,7 @@ var config struct {
 		Tenant   string
 		Secret   string
 		Callback string
+		Scopes   []string
 	}
 }
 
@@ -48,6 +51,9 @@ func main() {
 	config.Msal.Tenant = *(config_with_pointers.Msal.Tenant)
 	config.Msal.Secret = *(config_with_pointers.Msal.Secret)
 	config.Msal.Callback = *(config_with_pointers.Msal.Callback)
+	config.Msal.Scopes = *(config_with_pointers.Msal.Scopes)
+
+	fmt.Println(config)
 
 	cred, err := confidential.NewCredFromSecret(config.Msal.Secret)
 	e(err)
@@ -59,7 +65,11 @@ func main() {
 	)
 	e(err)
 
-	_ = confidential_client
+	result, err := confidential_client.AcquireTokenByCredential(
+		context.Background(),
+		config.Msal.Scopes,
+	)
+	e(err)
 
-	fmt.Println(config)
+	fmt.Println(result)
 }
