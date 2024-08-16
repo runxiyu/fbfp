@@ -485,7 +485,7 @@ def make_debug_app() -> flask.App:
     app = make_app(
         login_required=no_login_required,
 #         SQLALCHEMY_DATABASE_URI="sqlite:///test.db",
-        SQLALCHEMY_DATABASE_URI="mariadb+mariadbconnector://fbfpdev:fbfpdev@localhost/fbfpdev?unix_socket=/var/lib/mysql/mysql.sock",
+        SQLALCHEMY_DATABASE_URI="mariadb+mariadbconnector://fbfpdev:fbfpdev@localhost/fbfpdev?charset=utf8mb3&unix_socket=/var/lib/mysql/mysql.sock",
         FBFPC={
             "site_title": "FBFP Testing",
             "static_dir": "fbfp/static",
