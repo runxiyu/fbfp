@@ -9,8 +9,18 @@ import (
 	"git.sr.ht/~emersion/go-scfg"
 )
 
+var config_with_pointers struct {
+	Listen struct {
+		Port *int    `scfg:"port"`
+		Bind *string `scfg:"bind"`
+	} `scfg:"listen"`
+}
+
 var config struct {
-	Port *int `scfg:"port"`
+	Listen struct {
+		Port int
+		Bind string
+	}
 }
 
 func e(e error) {
@@ -23,8 +33,11 @@ func main() {
 	f, err := os.Open("fbfp.scfg")
 	e(err)
 
-	err = scfg.NewDecoder(bufio.NewReader(f)).Decode(&config)
+	err = scfg.NewDecoder(bufio.NewReader(f)).Decode(&config_with_pointers)
 	e(err)
 
-	fmt.Println(*(config.Port))
+	config.Listen.Port = *(config_with_pointers.Listen.Port)
+	config.Listen.Bind = *(config_with_pointers.Listen.Bind)
+
+	fmt.Println(config)
 }
