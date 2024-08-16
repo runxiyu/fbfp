@@ -8,11 +8,11 @@ import (
 )
 
 type openid_configuration_response_t struct {
-	AuthorizationEndpoint             *string     `json:"authorization_endpoint"`
-	TokenEndpoint                     *string     `json:"token_endpoint"`
-	TokenEndpointAuthMethodsSupported *([]string) `json:"token_endpoint_auth_methods_supported"`
-	JwksUri                           *string     `json:"jwks_uri"`
-	UserinfoEndpoint                  *string     `json:"userinfo_endpoint"`
+	AuthorizationEndpoint             string     `json:"authorization_endpoint"`
+	TokenEndpoint                     string     `json:"token_endpoint"`
+	TokenEndpointAuthMethodsSupported ([]string) `json:"token_endpoint_auth_methods_supported"`
+	JwksUri                           string     `json:"jwks_uri"`
+	UserinfoEndpoint                  string     `json:"userinfo_endpoint"`
 }
 
 /*
