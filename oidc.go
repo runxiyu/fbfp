@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 )
@@ -38,10 +39,7 @@ func get_openid_config(endpoint string) {
 	e(err)
 }
 
-func generate_authorization_url(
-	client_id string,
-	redirect_uri string,
-) string {
+func generate_authorization_url() string {
 	/*
 	 * TODO: Handle nonces and anti-replay. Incremental nonces would be
 	 * nice on memory and speed (depending on how maps are implemented in
@@ -51,10 +49,28 @@ func generate_authorization_url(
 	 */
 	nonce := random(30)
 	return fmt.Sprintf(
-		"%s?client_id=%s&response_type=id_token&redirect_uri=%s&response_mode=form_post&scope=openid&nonce=%s",
+		"%s?client_id=%s&response_type=id_token&redirect_uri=%s%s&response_mode=form_post&scope=openid&nonce=%s",
 		openid_configuration.AuthorizationEndpoint,
 		config.Openid.Client,
-		config.Openid.RedirectUri,
+		config.Url,
+		config.Openid.Redirect,
 		nonce,
 	)
+}
+
+func handle_oidc(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(405)
+		w.Write([]byte("Error: The OpenID Connect authorization endpoint only accepts POST requests.\n"))
+	}
+	eeee, err := io.ReadAll(req.Body)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(500)
+		w.Write([]byte("Error: Internal server error while reading from stream.\n"))
+	}
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(200)
+	w.Write([]byte(eeee))
 }

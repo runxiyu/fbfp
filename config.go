@@ -9,21 +9,23 @@ import (
 
 var config_with_pointers struct {
 	Listen *string `scfg:"listen"`
+	Url    *string `scfg:"url"`
 	Openid struct {
-		Client      *string `scfg:"client"`
-		Secret      *string `scfg:"secret"`
-		Endpoint    *string `scfg:"endpoint"`
-		RedirectUri *string `scfg:"redirect_uri"`
+		Client   *string `scfg:"client"`
+		Secret   *string `scfg:"secret"`
+		Endpoint *string `scfg:"endpoint"`
+		Redirect *string `scfg:"redirect"`
 	} `scfg:"openid"`
 }
 
 var config struct {
 	Listen string
+	Url    string
 	Openid struct {
-		Client      string
-		Secret      string
-		Endpoint    string
-		RedirectUri string
+		Client   string
+		Secret   string
+		Endpoint string
+		Redirect string
 	}
 }
 
@@ -39,8 +41,9 @@ func fbfp_get_config(path string) {
 	 * There should be better ways to handle this.
 	 */
 	config.Listen = *(config_with_pointers.Listen)
+	config.Url = *(config_with_pointers.Url)
 	config.Openid.Client = *(config_with_pointers.Openid.Client)
 	config.Openid.Endpoint = *(config_with_pointers.Openid.Endpoint)
 	config.Openid.Secret = *(config_with_pointers.Openid.Secret)
-	config.Openid.RedirectUri = *(config_with_pointers.Openid.RedirectUri)
+	config.Openid.Redirect = *(config_with_pointers.Openid.Redirect)
 }
