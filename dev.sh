@@ -4,7 +4,7 @@ set -x
 
 signal_handler () {
 	echo
-	sudo systemctl stop mariadb
+	# sudo systemctl stop mariadb
 	exit
 }
 
