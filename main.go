@@ -14,8 +14,10 @@ func handle_index(w http.ResponseWriter, req *http.Request) {
 func main() {
 	fbfp_get_config("fbfp.scfg")
 
+	log.Printf("Fetching OpenID Connect configuration\n")
 	get_openid_config(config.Openid.Endpoint)
 
+	log.Printf("Registering handlers\n")
 	http.HandleFunc("/", handle_index)
 	http.HandleFunc(config.Openid.Redirect, handle_oidc)
 

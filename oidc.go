@@ -132,6 +132,9 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	var jose_header jose_header_t
 	err = json.Unmarshal(jose_header_json, &jose_header)
 
+	_ = jwt_payload_base64u
+	_ = jwt_signature_base64u
+
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(200)
 	w.Write([]byte("Alright, for now.\n"))
