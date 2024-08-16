@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 
 	"git.sr.ht/~emersion/go-scfg"
@@ -20,12 +19,6 @@ var config struct {
 	Listen struct {
 		Port int
 		Bind string
-	}
-}
-
-func e(e error) {
-	if e != nil {
-		log.Fatal(e)
 	}
 }
 
