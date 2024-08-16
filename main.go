@@ -2,12 +2,10 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"os"
 
 	"git.sr.ht/~emersion/go-scfg"
-	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/confidential"
 )
 
 var config_with_pointers struct {
@@ -15,13 +13,12 @@ var config_with_pointers struct {
 		Port *int    `scfg:"port"`
 		Bind *string `scfg:"bind"`
 	} `scfg:"listen"`
-	Msal struct {
-		Client   *string     `scfg:"client"`
-		Tenant   *string     `scfg:"tenant"`
-		Secret   *string     `scfg:"secret"`
-		Callback *string     `scfg:"callback"`
-		Scopes   *([]string) `scfg:"scopes"`
-	} `scfg:"msal"`
+	Openid struct {
+		Client      *string `scfg:"client"`
+		Secret      *string `scfg:"secret"`
+		Endpoint    *string `scfg:"endpoint"`
+		RedirectUri *string `scfg:"redirect_uri"`
+	} `scfg:"openid"`
 }
 
 var config struct {
@@ -29,12 +26,11 @@ var config struct {
 		Port int
 		Bind string
 	}
-	Msal struct {
-		Client   string
-		Tenant   string
-		Secret   string
-		Callback string
-		Scopes   []string
+	Openid struct {
+		Client      string
+		Secret      string
+		Endpoint    string
+		RedirectUri string
 	}
 }
 
@@ -47,29 +43,11 @@ func main() {
 
 	config.Listen.Port = *(config_with_pointers.Listen.Port)
 	config.Listen.Bind = *(config_with_pointers.Listen.Bind)
-	config.Msal.Client = *(config_with_pointers.Msal.Client)
-	config.Msal.Tenant = *(config_with_pointers.Msal.Tenant)
-	config.Msal.Secret = *(config_with_pointers.Msal.Secret)
-	config.Msal.Callback = *(config_with_pointers.Msal.Callback)
-	config.Msal.Scopes = *(config_with_pointers.Msal.Scopes)
+	config.Openid.Client = *(config_with_pointers.Openid.Client)
+	config.Openid.Endpoint = *(config_with_pointers.Openid.Endpoint)
+	config.Openid.Secret = *(config_with_pointers.Openid.Secret)
+	config.Openid.RedirectUri = *(config_with_pointers.Openid.RedirectUri)
 
 	fmt.Println(config)
 
-	cred, err := confidential.NewCredFromSecret(config.Msal.Secret)
-	e(err)
-
-	confidential_client, err := confidential.New(
-		"https://login.microsoftonline.com/"+config.Msal.Tenant,
-		config.Msal.Client,
-		cred,
-	)
-	e(err)
-
-	result, err := confidential_client.AcquireTokenByCredential(
-		context.Background(),
-		config.Msal.Scopes,
-	)
-	e(err)
-
-	fmt.Println(result)
 }
