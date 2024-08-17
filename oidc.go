@@ -23,6 +23,14 @@ var openid_configuration struct {
 // var openid_keyfunc keyfunc.Keyfunc
 var openid_keyfunc keyfunc.Keyfunc
 
+type msclaims_t struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Oid   string `json:"oid"`
+	jwt.RegisteredClaims
+	/* TODO: These may be non-portable Microsoft attributes */
+}
+
 /*
  * Fetch the OpenID Connect configuration. The endpoint specified in
  * the configuration is incomplete and we fetch the OpenID Connect
@@ -55,6 +63,10 @@ func get_openid_config(endpoint string) {
 		))
 	}
 
+	if config.Openid.Authorize != "" {
+		openid_configuration.AuthorizationEndpoint = config.Openid.Authorize
+	}
+
 	jwks_json, err := io.ReadAll(resp.Body)
 	e(err)
 
@@ -72,7 +84,7 @@ func generate_authorization_url() string {
 	 */
 	nonce := random(30)
 	return fmt.Sprintf(
-		"%s?client_id=%s&response_type=id_token&redirect_uri=%s%s&response_mode=form_post&scope=openid&nonce=%s",
+		"%s?client_id=%s&response_type=id_token&redirect_uri=%s%s&response_mode=form_post&scope=openid+profile+email&nonce=%s",
 		openid_configuration.AuthorizationEndpoint,
 		config.Openid.Client,
 		config.Url,
@@ -127,6 +139,8 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte(fmt.Sprintf("Error: The OpenID Connect callback did not return an error, but no id_token was found.\n")))
 		return
 	}
+
+	fmt.Println(id_token_string)
 
 	token, err := jwt.Parse(
 		id_token_string,

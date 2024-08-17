@@ -7,14 +7,23 @@ import (
 	"git.sr.ht/~emersion/go-scfg"
 )
 
+/*
+ * config.Openid.Authorize doesn't have to be specified. But if it is
+ * specified, it replaces the once obtained from the
+ * .well-known/openid-configuration endpoint. Because Microsoft doesn't seem to
+ * want to put their v2.0 authorization endpoint anywhere in their
+ * configuration.
+ */
+
 var config_with_pointers struct {
 	Listen *string `scfg:"listen"`
 	Url    *string `scfg:"url"`
 	Openid struct {
-		Client   *string `scfg:"client"`
-		Secret   *string `scfg:"secret"`
-		Endpoint *string `scfg:"endpoint"`
-		Redirect *string `scfg:"redirect"`
+		Client    *string `scfg:"client"`
+		Secret    *string `scfg:"secret"`
+		Endpoint  *string `scfg:"endpoint"`
+		Authorize *string `scfg:"authorize"`
+		Redirect  *string `scfg:"redirect"`
 	} `scfg:"openid"`
 }
 
@@ -22,10 +31,11 @@ var config struct {
 	Listen string
 	Url    string
 	Openid struct {
-		Client   string
-		Secret   string
-		Endpoint string
-		Redirect string
+		Client    string
+		Secret    string
+		Endpoint  string
+		Authorize string
+		Redirect  string
 	}
 }
 
@@ -46,4 +56,8 @@ func fbfp_get_config(path string) {
 	config.Openid.Endpoint = *(config_with_pointers.Openid.Endpoint)
 	config.Openid.Secret = *(config_with_pointers.Openid.Secret)
 	config.Openid.Redirect = *(config_with_pointers.Openid.Redirect)
+
+	if config_with_pointers.Openid.Authorize != nil {
+		config.Openid.Authorize = *(config_with_pointers.Openid.Authorize)
+	}
 }
