@@ -68,6 +68,12 @@ func get_openid_config(endpoint string) {
 	jwks_json, err := io.ReadAll(resp.Body)
 	e(err)
 
+	/*
+	 * TODO: The key set is never updated, which is technically incorrect.
+	 * We could use keyfunc's auto-update mechanism, but I'd prefer
+	 * controlling when to do it manually. Remember to wrap it around a
+	 * mutex or some semaphores though.
+	 */
 	openid_keyfunc, err = keyfunc.NewJWKSetJSON(jwks_json)
 	e(err)
 }
