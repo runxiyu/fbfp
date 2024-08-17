@@ -20,14 +20,13 @@ var openid_configuration struct {
 	UserinfoEndpoint                  string     `json:"userinfo_endpoint"`
 }
 
-// var openid_keyfunc keyfunc.Keyfunc
 var openid_keyfunc keyfunc.Keyfunc
 
 type msclaims_t struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	jwt.RegisteredClaims
 	/* TODO: These may be non-portable Microsoft attributes */
+	Name  string `json:"name"`  /* Scope: profile */
+	Email string `json:"email"` /* Scope: email   */
+	jwt.RegisteredClaims
 }
 
 /*
