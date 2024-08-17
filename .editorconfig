@@ -1,23 +1,29 @@
-root = true
+root                     = true
 
 [*]
-end_of_line = lf
-insert_final_newline = true
-indent_style = tab
-indent_size = 8
-tab_size = 8
+end_of_line              = lf
+charset                  = utf-8
+trim_trailing_whitespace = true
+insert_final_newline     = true
+indent_style             = tab
+indent_size              = 8
+tab_size                 = 8
 
 [*.go]
-indent_style = tab
+indent_style             = tab
+max_line_length          = 80
+
+[*.scfg]
+indent_style             = tab
 
 [*.js]
-indent_style = space
-indent_size = 2
+indent_style             = space
+indent_size              = 2
 
 [*.css]
-indent_style = tab
+indent_style             = tab
 
 [*.html]
-indent_style = tab
-indent_size = 4
-tab_size = 4
+indent_style             = tab
+indent_size              = 4
+tab_size                 = 4
