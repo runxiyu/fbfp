@@ -26,7 +26,6 @@ var openid_keyfunc keyfunc.Keyfunc
 type msclaims_t struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
-	Oid   string `json:"oid"`
 	jwt.RegisteredClaims
 	/* TODO: These may be non-portable Microsoft attributes */
 }
@@ -95,7 +94,7 @@ func generate_authorization_url() string {
 
 func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(405)
 		w.Write([]byte("Error: The OpenID Connect authorization endpoint only accepts POST requests.\n"))
 		return
@@ -103,7 +102,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 
 	err := req.ParseForm()
 	if err != nil {
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
 		w.Write([]byte("Error: Malformed form data.\n"))
 		return
@@ -113,7 +112,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if returned_error != "" {
 		returned_error_description := req.PostFormValue("error_description")
 		if returned_error_description == "" {
-			w.Header().Set("Content-Type", "text/plain")
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.WriteHeader(400)
 			w.Write([]byte(fmt.Sprintf(
 				"Error: The OpenID Connect callback returned an error %s, but did not provide an error_description.\n",
@@ -121,7 +120,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 			)))
 			return
 		} else {
-			w.Header().Set("Content-Type", "text/plain")
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.WriteHeader(400)
 			w.Write([]byte(fmt.Sprintf(
 				"Error: The OpenID Connect callback returned an error:\n\n%s\n\n%s\n",
@@ -134,7 +133,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 
 	id_token_string := req.PostFormValue("id_token")
 	if id_token_string == "" {
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
 		w.Write([]byte(fmt.Sprintf("Error: The OpenID Connect callback did not return an error, but no id_token was found.\n")))
 		return
@@ -142,47 +141,55 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Println(id_token_string)
 
-	token, err := jwt.Parse(
+	token, err := jwt.ParseWithClaims(
 		id_token_string,
+		&msclaims_t{},
 		openid_keyfunc.Keyfunc,
 	)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(400)
+		w.Write([]byte(fmt.Sprintf("Error: Error parsing JWT with custom claims.\n")))
+		return
+	}
 
 	switch {
 	case token.Valid:
 		break
 	case errors.Is(err, jwt.ErrTokenMalformed):
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
 		w.Write([]byte(fmt.Sprintf("Error: Malformed JWT token.\n")))
 		return
 	case errors.Is(err, jwt.ErrTokenSignatureInvalid):
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
 		w.Write([]byte(fmt.Sprintf("Error: Invalid signature on JWT token.\n")))
 		return
 	case errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet):
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
 		w.Write([]byte(fmt.Sprintf("Error: JWT token expired or not yet valid.\n")))
 		return
 	default:
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
 		w.Write([]byte(fmt.Sprintf("Error: Funny JWT token.\n")))
 		return
 	}
 
-	subject, err := token.Claims.GetSubject()
-	if err != nil {
-		w.Header().Set("Content-Type", "text/plain")
+	claims, claims_ok := token.Claims.(*msclaims_t)
+
+	if !claims_ok {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: Invalid claim 'sub'.\n")))
+		w.Write([]byte(fmt.Sprintf("Error: JWT token's claims are not OK.\n")))
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(200)
-	w.Write([]byte(fmt.Sprintf("Name: %s\nEmail: %s\nSubject: %s\n", "", "", subject)))
+	w.Write([]byte(fmt.Sprintf("Name: %s\nEmail: %s\nSubject: %s\n", claims.Name, claims.Email, claims.Subject)))
 	return
 
 }
