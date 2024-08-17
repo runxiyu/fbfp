@@ -61,6 +61,7 @@ func fbfp_get_config(path string) {
 	config.Openid.Redirect = *(config_with_pointers.Openid.Redirect)
 
 	if config_with_pointers.Openid.Authorize != nil {
-		config.Openid.Authorize = *(config_with_pointers.Openid.Authorize)
+		config.Openid.Authorize =
+			*(config_with_pointers.Openid.Authorize)
 	}
 }

@@ -23,7 +23,11 @@ func main() {
 	http.HandleFunc("/", handle_index)
 	http.HandleFunc(config.Openid.Redirect, handle_oidc)
 
-	log.Printf("Establishing listener for net %s, addr %s\n", config.Net, config.Addr)
+	log.Printf(
+		"Establishing listener for net %s, addr %s\n",
+		config.Net,
+		config.Addr,
+	)
 
 	l, err := net.Listen(config.Net, config.Addr)
 	e(err)

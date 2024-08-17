@@ -13,11 +13,10 @@ import (
 )
 
 var openid_configuration struct {
-	AuthorizationEndpoint             string     `json:"authorization_endpoint"`
-	TokenEndpoint                     string     `json:"token_endpoint"`
-	TokenEndpointAuthMethodsSupported ([]string) `json:"token_endpoint_auth_methods_supported"`
-	JwksUri                           string     `json:"jwks_uri"`
-	UserinfoEndpoint                  string     `json:"userinfo_endpoint"`
+	AuthorizationEndpoint string `json:"authorization_endpoint"`
+	TokenEndpoint         string `json:"token_endpoint"`
+	JwksUri               string `json:"jwks_uri"`
+	UserinfoEndpoint      string `json:"userinfo_endpoint"`
 }
 
 var openid_keyfunc keyfunc.Keyfunc
@@ -62,7 +61,8 @@ func get_openid_config(endpoint string) {
 	}
 
 	if config.Openid.Authorize != "" {
-		openid_configuration.AuthorizationEndpoint = config.Openid.Authorize
+		openid_configuration.AuthorizationEndpoint =
+			config.Openid.Authorize
 	}
 
 	jwks_json, err := io.ReadAll(resp.Body)
@@ -88,7 +88,13 @@ func generate_authorization_url() string {
 	 */
 	nonce := random(30)
 	return fmt.Sprintf(
-		"%s?client_id=%s&response_type=id_token&redirect_uri=%s%s&response_mode=form_post&scope=openid+profile+email&nonce=%s",
+		"%s"+
+			"?client_id=%s"+
+			"&response_type=id_token"+
+			"&redirect_uri=%s%s"+
+			"&response_mode=form_post"+
+			"&scope=openid+profile+email"+
+			"&nonce=%s",
 		openid_configuration.AuthorizationEndpoint,
 		config.Openid.Client,
 		config.Url,
@@ -101,7 +107,11 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "POST" {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(405)
-		w.Write([]byte("Error: The OpenID Connect authorization endpoint only accepts POST requests.\n"))
+		w.Write([]byte(
+			"Error\n" +
+				"Only POST is allowed on the OIDC callback.\n" +
+				"Please return to the login page and retry.\n",
+		))
 		return
 	}
 
@@ -109,26 +119,36 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte("Error: Malformed form data.\n"))
+		w.Write([]byte(
+			"Error\n" +
+				"Malformed form data.\n",
+		))
 		return
 	}
 
 	returned_error := req.PostFormValue("error")
 	if returned_error != "" {
-		returned_error_description := req.PostFormValue("error_description")
+		returned_error_description :=
+			req.PostFormValue("error_description")
 		if returned_error_description == "" {
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Set(
+				"Content-Type",
+				"text/plain; charset=utf-8",
+			)
 			w.WriteHeader(400)
 			w.Write([]byte(fmt.Sprintf(
-				"Error: The OpenID Connect callback returned an error %s, but did not provide an error_description.\n",
+				"Error\n%s\n",
 				returned_error,
 			)))
 			return
 		} else {
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Set(
+				"Content-Type",
+				"text/plain; charset=utf-8",
+			)
 			w.WriteHeader(400)
 			w.Write([]byte(fmt.Sprintf(
-				"Error: The OpenID Connect callback returned an error:\n\n%s\n\n%s\n",
+				"Error\n%s\n%s\n",
 				returned_error,
 				returned_error_description,
 			)))
@@ -140,7 +160,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if id_token_string == "" {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: The OpenID Connect callback did not return an error, but no id_token was found.\n")))
+		w.Write([]byte(fmt.Sprintf("Error\nMissing id_token.\n")))
 		return
 	}
 
@@ -152,7 +172,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: Error parsing JWT with custom claims.\n")))
+		w.Write([]byte(fmt.Sprintf("Error\nCannot parse claims.\n")))
 		return
 	}
 
@@ -162,22 +182,26 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	case errors.Is(err, jwt.ErrTokenMalformed):
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: Malformed JWT token.\n")))
+		w.Write([]byte(fmt.Sprintf("Error\nMalformed JWT token.\n")))
 		return
 	case errors.Is(err, jwt.ErrTokenSignatureInvalid):
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: Invalid signature on JWT token.\n")))
+		w.Write([]byte(fmt.Sprintf("Error\nInvalid JWS signature.\n")))
 		return
-	case errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet):
+	case errors.Is(err, jwt.ErrTokenExpired) ||
+		errors.Is(err, jwt.ErrTokenNotValidYet):
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: JWT token expired or not yet valid.\n")))
+		w.Write([]byte(fmt.Sprintf(
+			"Error\n" +
+				"JWT token expired or not yet valid.\n",
+		)))
 		return
 	default:
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: Funny JWT token.\n")))
+		w.Write([]byte(fmt.Sprintf("Error\nInvalid JWT token.\n")))
 		return
 	}
 
@@ -186,13 +210,18 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if !claims_ok {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error: JWT token's claims are not OK.\n")))
+		w.Write([]byte(fmt.Sprintf("Error\nCannot unpack claims.\n")))
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(200)
-	w.Write([]byte(fmt.Sprintf("Name: %s\nEmail: %s\nSubject: %s\n", claims.Name, claims.Email, claims.Subject)))
+	w.Write([]byte(fmt.Sprintf(
+		"Name: %s\nEmail: %s\nSubject: %s\n",
+		claims.Name,
+		claims.Email,
+		claims.Subject,
+	)))
 	return
 
 }
