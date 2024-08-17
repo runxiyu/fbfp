@@ -144,8 +144,6 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println(id_token_string)
-
 	token, err := jwt.ParseWithClaims(
 		id_token_string,
 		&msclaims_t{},

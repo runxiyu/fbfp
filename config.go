@@ -16,7 +16,9 @@ import (
  */
 
 var config_with_pointers struct {
-	Listen *string `scfg:"listen"`
+	Addr   *string `scfg:"addr"`
+	Net    *string `scfg:"net"`
+	Proto  *string `scfg:"proto"`
 	Url    *string `scfg:"url"`
 	Openid struct {
 		Client    *string `scfg:"client"`
@@ -27,7 +29,9 @@ var config_with_pointers struct {
 }
 
 var config struct {
-	Listen string
+	Addr   string
+	Net    string
+	Proto  string
 	Url    string
 	Openid struct {
 		Client    string
@@ -48,7 +52,9 @@ func fbfp_get_config(path string) {
 	 * TODO: We segfault when there are missing configuration options.
 	 * There should be better ways to handle this.
 	 */
-	config.Listen = *(config_with_pointers.Listen)
+	config.Addr = *(config_with_pointers.Addr)
+	config.Net = *(config_with_pointers.Net)
+	config.Proto = *(config_with_pointers.Proto)
 	config.Url = *(config_with_pointers.Url)
 	config.Openid.Client = *(config_with_pointers.Openid.Client)
 	config.Openid.Endpoint = *(config_with_pointers.Openid.Endpoint)

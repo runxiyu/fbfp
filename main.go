@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"net"
 	"net/http"
+	"net/http/fcgi"
 )
 
 func handle_index(w http.ResponseWriter, req *http.Request) {
@@ -21,6 +23,17 @@ func main() {
 	http.HandleFunc("/", handle_index)
 	http.HandleFunc(config.Openid.Redirect, handle_oidc)
 
-	log.Printf("Listening on %s\n", config.Listen)
-	http.ListenAndServe(config.Listen, nil)
+	log.Printf("Establishing listener for net %s, addr %s\n", config.Net, config.Addr)
+
+	l, err := net.Listen(config.Net, config.Addr)
+	e(err)
+
+	if config.Proto == "http" {
+		log.Printf("Serving http\n")
+		err = http.Serve(l, nil)
+	} else if config.Proto == "fcgi" {
+		log.Printf("Serving fcgi\n")
+		err = fcgi.Serve(l, nil)
+	}
+	e(err)
 }

@@ -1,4 +1,6 @@
-listen ":5555"
+proto  "http"
+net    "tcp"
+addr   ":5555"
 url    "http://localhost:5555"
 
 openid {
