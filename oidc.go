@@ -172,9 +172,17 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	subject, err := token.Claims.GetSubject()
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(400)
+		w.Write([]byte(fmt.Sprintf("Error: Invalid claim 'sub'.\n")))
+		return
+	}
+
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(200)
-	w.Write([]byte("Alright, for now.\n"))
+	w.Write([]byte(fmt.Sprintf("Name: %s\nEmail: %s\nSubject: %s\n", "", "", subject)))
 	return
 
 }
