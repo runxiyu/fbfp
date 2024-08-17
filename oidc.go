@@ -1,13 +1,14 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
+	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -19,7 +20,8 @@ var openid_configuration struct {
 	UserinfoEndpoint                  string     `json:"userinfo_endpoint"`
 }
 
-var openid_keys map[string]([]byte)
+// var openid_keyfunc keyfunc.Keyfunc
+var openid_keyfunc keyfunc.Keyfunc
 
 /*
  * Fetch the OpenID Connect configuration. The endpoint specified in
@@ -52,41 +54,12 @@ func get_openid_config(endpoint string) {
 			resp.StatusCode,
 		))
 	}
-	var jwks_response struct {
-		Keys [](struct {
-			// Kty string `json:"kty"`
-			Use string   `json:"use"`
-			Kid string   `json:"kid"`
-			N   string   `json:"n"`
-			X5c []string `json:"x5c"`
-		}) `json:"keys"`
-	}
-	err = json.NewDecoder(resp.Body).Decode(&jwks_response)
+
+	jwks_json, err := io.ReadAll(resp.Body)
 	e(err)
 
-	openid_keys = make(map[string]([]byte))
-
-	for _, key := range jwks_response.Keys {
-		if key.Use == "sig" {
-			if len(key.X5c) != 1 {
-				log.Println("Encountered key with more than one x5c, strange!")
-				continue
-			}
-			// d, err := base64.StdEncoding.DecodeString(key.X5c[0])
-			d, err := base64.RawURLEncoding.DecodeString(key.N)
-			e(err)
-			openid_keys[key.Kid] = d
-		} else {
-			continue
-		}
-	}
-}
-
-func get_key_from_kid(kid string) []byte {
-	// TODO: Poll the keys endpoint if the key is not found, with rate
-	// limits, and wrapped with a mutex (makes more sense than channels
-	// here)
-	return openid_keys[kid]
+	openid_keyfunc, err = keyfunc.NewJWKSetJSON(jwks_json)
+	e(err)
 }
 
 func generate_authorization_url() string {
@@ -157,9 +130,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 
 	token, err := jwt.Parse(
 		id_token_string,
-		func(token *jwt.Token) (interface{}, error) {
-			return get_key_from_kid(token.Header["kid"].(string)), nil
-		},
+		openid_keyfunc.Keyfunc,
 	)
 
 	switch {
