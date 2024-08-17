@@ -20,7 +20,6 @@ var config_with_pointers struct {
 	Url    *string `scfg:"url"`
 	Openid struct {
 		Client    *string `scfg:"client"`
-		Secret    *string `scfg:"secret"`
 		Endpoint  *string `scfg:"endpoint"`
 		Authorize *string `scfg:"authorize"`
 		Redirect  *string `scfg:"redirect"`
@@ -32,7 +31,6 @@ var config struct {
 	Url    string
 	Openid struct {
 		Client    string
-		Secret    string
 		Endpoint  string
 		Authorize string
 		Redirect  string
@@ -54,7 +52,6 @@ func fbfp_get_config(path string) {
 	config.Url = *(config_with_pointers.Url)
 	config.Openid.Client = *(config_with_pointers.Openid.Client)
 	config.Openid.Endpoint = *(config_with_pointers.Openid.Endpoint)
-	config.Openid.Secret = *(config_with_pointers.Openid.Secret)
 	config.Openid.Redirect = *(config_with_pointers.Openid.Redirect)
 
 	if config_with_pointers.Openid.Authorize != nil {
