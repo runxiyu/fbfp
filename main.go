@@ -1,6 +1,27 @@
+/*
+ * The main logic for fbfp.
+ *
+ * Copyright (C) 2024  Runxi Yu <https://runxiyu.org>
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -16,7 +37,21 @@ var db *gorm.DB
 var tmpl *template.Template
 
 func handle_index(w http.ResponseWriter, req *http.Request) {
-	tmpl.ExecuteTemplate(w, "index", nil)
+	session_cookie, err := req.Cookie("session")
+	if errors.Is(err, http.ErrNoCookie) {
+		err = tmpl.ExecuteTemplate(w, "index_login", nil)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
+	_ = session_cookie
+	err = tmpl.ExecuteTemplate(w, "index", nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }
 
 func handle_login(w http.ResponseWriter, req *http.Request) {
