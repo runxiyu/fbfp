@@ -26,7 +26,14 @@ func handle_login(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	/*
+	 * This seems necessary because in the following sections I need to
+	 * assign to global variables like db and tmpl. If I use = there, and
+	 * don't declare err here, then err is undeclared; but if I use :=
+	 * there, my global variables are treated as local variables.
+	 */
 	var err error
+
 	fbfp_get_config("fbfp.scfg")
 
 	log.Printf("Opening database\n")
@@ -35,7 +42,7 @@ func main() {
 		db, err = gorm.Open(sqlite.Open(config.Db.Conn), &gorm.Config{})
 		e(err)
 	default:
-		e(fmt.Errorf("Database type %s unsupported", config.Db.Type))
+		e(fmt.Errorf("Database type \"%s\" unsupported", config.Db.Type))
 	}
 
 	log.Printf("Setting up templates\n")
@@ -54,7 +61,7 @@ func main() {
 	http.HandleFunc("/oidc", handle_oidc)
 
 	log.Printf(
-		"Establishing listener for net %s, addr %s\n",
+		"Establishing listener for net \"%s\", addr \"%s\"\n",
 		config.Listen.Net,
 		config.Listen.Addr,
 	)
