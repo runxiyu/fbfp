@@ -1,7 +1,10 @@
-proto  http
-net    tcp
-addr   :5555
-url    http://localhost:5555
+url http://localhost:5555
+
+listen {
+	proto http
+	net   tcp
+	addr  :5555
+}
 
 db {
 	type sqlite

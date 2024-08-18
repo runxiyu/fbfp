@@ -16,11 +16,13 @@ import (
  */
 
 var config_with_pointers struct {
-	Addr  *string `scfg:"addr"`
-	Net   *string `scfg:"net"`
-	Proto *string `scfg:"proto"`
-	Url   *string `scfg:"url"`
-	Db    struct {
+	Url    *string `scfg:"url"`
+	Listen struct {
+		Addr  *string `scfg:"addr"`
+		Net   *string `scfg:"net"`
+		Proto *string `scfg:"proto"`
+	} `scfg:"listen"`
+	Db struct {
 		Type *string `scfg:"type"`
 		Conn *string `scfg:"conn"`
 	} `scfg:"db"`
@@ -33,11 +35,13 @@ var config_with_pointers struct {
 }
 
 var config struct {
-	Addr  string
-	Net   string
-	Proto string
-	Url   string
-	Db    struct {
+	Url    string
+	Listen struct {
+		Addr  string
+		Net   string
+		Proto string
+	}
+	Db struct {
 		Type string
 		Conn string
 	}
@@ -60,10 +64,10 @@ func fbfp_get_config(path string) {
 	 * TODO: We segfault when there are missing configuration options.
 	 * There should be better ways to handle this.
 	 */
-	config.Addr = *(config_with_pointers.Addr)
-	config.Net = *(config_with_pointers.Net)
-	config.Proto = *(config_with_pointers.Proto)
 	config.Url = *(config_with_pointers.Url)
+	config.Listen.Addr = *(config_with_pointers.Listen.Addr)
+	config.Listen.Net = *(config_with_pointers.Listen.Net)
+	config.Listen.Proto = *(config_with_pointers.Listen.Proto)
 	config.Db.Type = *(config_with_pointers.Db.Type)
 	config.Db.Conn = *(config_with_pointers.Db.Conn)
 	config.Openid.Client = *(config_with_pointers.Openid.Client)

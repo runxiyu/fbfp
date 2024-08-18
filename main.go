@@ -43,19 +43,19 @@ func main() {
 
 	log.Printf(
 		"Establishing listener for net %s, addr %s\n",
-		config.Net,
-		config.Addr,
+		config.Listen.Net,
+		config.Listen.Addr,
 	)
-	l, err := net.Listen(config.Net, config.Addr)
+	l, err := net.Listen(config.Listen.Net, config.Listen.Addr)
 	e(err)
 
 	log.Printf("Fetching OpenID Connect configuration\n")
 	get_openid_config(config.Openid.Endpoint)
 
-	if config.Proto == "http" {
+	if config.Listen.Proto == "http" {
 		log.Printf("Serving http\n")
 		err = http.Serve(l, nil)
-	} else if config.Proto == "fcgi" {
+	} else if config.Listen.Proto == "fcgi" {
 		log.Printf("Serving fcgi\n")
 		err = fcgi.Serve(l, nil)
 	}
