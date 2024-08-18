@@ -22,14 +22,12 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"html/template"
 	"log"
 	"net"
 	"net/http"
 	"net/http/fcgi"
 
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -71,14 +69,8 @@ func main() {
 
 	fbfp_get_config("fbfp.scfg")
 
-	log.Printf("Opening database\n")
-	switch config.Db.Type {
-	case "sqlite":
-		db, err = gorm.Open(sqlite.Open(config.Db.Conn), &gorm.Config{})
-		e(err)
-	default:
-		e(fmt.Errorf("Database type \"%s\" unsupported", config.Db.Type))
-	}
+	log.Printf("Setting up database\n")
+	e(setup_database())
 
 	log.Printf("Setting up templates\n")
 	tmpl, err = template.ParseGlob("tmpl/*")
