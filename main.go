@@ -95,6 +95,9 @@ func main() {
 	http.HandleFunc("/login", handle_login)
 	http.HandleFunc("/oidc", handle_oidc)
 
+	log.Printf("Fetching OpenID Connect configuration\n")
+	get_openid_config(config.Openid.Endpoint)
+
 	log.Printf(
 		"Establishing listener for net \"%s\", addr \"%s\"\n",
 		config.Listen.Net,
@@ -102,9 +105,6 @@ func main() {
 	)
 	l, err := net.Listen(config.Listen.Net, config.Listen.Addr)
 	e(err)
-
-	log.Printf("Fetching OpenID Connect configuration\n")
-	get_openid_config(config.Openid.Endpoint)
 
 	if config.Listen.Proto == "http" {
 		log.Printf("Serving http\n")
