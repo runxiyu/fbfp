@@ -39,7 +39,7 @@ func main() {
 	}
 
 	log.Printf("Setting up templates\n")
-	tmpl, err = template.ParseGlob("*.tmpl")
+	tmpl, err = template.ParseGlob("tmpl/*")
 	e(err)
 
 	log.Printf("Registering handlers\n")
