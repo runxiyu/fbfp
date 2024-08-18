@@ -21,7 +21,7 @@ func main() {
 	fbfp_get_config("fbfp.scfg")
 
 	log.Printf("Registering handlers\n")
-	http.HandleFunc("/", handle_index)
+	http.HandleFunc("/{$}", handle_index)
 	http.HandleFunc("/login", handle_login)
 	http.HandleFunc(config.Openid.Redirect, handle_oidc)
 
