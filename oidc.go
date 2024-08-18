@@ -214,13 +214,24 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	cookie_value := random(20)
+
+	cookie := http.Cookie{
+		Name:     "session",
+		Value:    cookie_value,
+		SameSite: http.SameSiteLaxMode,
+		HttpOnly: true,
+	}
+
+	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(200)
 	w.Write([]byte(fmt.Sprintf(
-		"Name: %s\nEmail: %s\nSubject: %s\n",
+		"Name: %s\nEmail: %s\nSubject: %s\nCookie: %s\n",
 		claims.Name,
 		claims.Email,
 		claims.Subject,
+		cookie_value,
 	)))
 	return
 
