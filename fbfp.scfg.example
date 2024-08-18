@@ -1,6 +1,6 @@
 # Which URL are we accessible at? This is used to determine the redirect URL
 # and some user-accessible URLs.
-url  http://localhost
+url http://localhost
 
 # Should we serve /static ourself? This should usually be handled by the
 # upstream Web server such as nginx(8) or OpenBSD httpd(8). However, this might
@@ -17,12 +17,12 @@ listen {
 
 	# Which network backend should we use? This is usually set to "tcp"
 	# for plain TCP, and "unix" for UNIX domain sockets.
-	net   unix
+	net unix
 
 	# What is the address we should listen at? This is usually set to
 	# something like ":5555" for TCP, and a file path for UNIX domain
 	# sockets.
-	addr  test.socket
+	addr test.socket
 }
 
 db {
@@ -37,11 +37,11 @@ db {
 
 openid {
 	# What is our OAUTH2 client ID?
-	client    6d3106e1-a859-4e68-8115-8df599333fc6
+	client 6d3106e1-a859-4e68-8115-8df599333fc6
 
 	# What is the OpenID Connect endpoint? The OpenID configuration is
 	# taken from this/.well-known/openid-configuration.
-	endpoint  https://login.microsoftonline.com/ddd3d26c-b197-4d00-a32d-1ffd84c0c295
+	endpoint https://login.microsoftonline.com/ddd3d26c-b197-4d00-a32d-1ffd84c0c295
 
 	# [optional] This option may be used to override the OpenID authorize
 	# endpoint. This is generally necessary when using Microsoft's OpenID
