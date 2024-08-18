@@ -138,10 +138,11 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(
-			"Error\n" +
-				"Malformed form data.\n",
-		))
+		w.Write([]byte(fmt.Sprintf(
+			"Error\n"+
+				"Malformed form data.\n%s\n",
+			err,
+		)))
 		return
 	}
 
@@ -191,7 +192,11 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf("Error\nCannot parse claims.\n")))
+		w.Write([]byte(fmt.Sprintf(
+			"Error\n"+
+				"Cannot parse claims.\n%s\n",
+			err,
+		)))
 		return
 	}
 
@@ -244,6 +249,22 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 
 	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
+	var user user_t
+	err = db.FirstOrCreate(&user, user_t{Subject: claims.Subject}).Error
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(500)
+		w.Write([]byte(fmt.Sprintf(
+			"Error\nDatabase query failed.\n%s\n",
+			err,
+		)))
+		return
+	}
+	user.Name = claims.Name
+	user.Email = claims.Email
+	db.Save(&user)
+
 	w.WriteHeader(200)
 	w.Write([]byte(fmt.Sprintf(
 		"Name: %s\nEmail: %s\nSubject: %s\nCookie: %s\n",
