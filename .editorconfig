@@ -27,3 +27,8 @@ indent_style             = tab
 indent_style             = tab
 indent_size              = 4
 tab_size                 = 4
+
+[*.tmpl]
+indent_style             = tab
+indent_size              = 4
+tab_size                 = 4

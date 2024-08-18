@@ -7,6 +7,8 @@ require git.sr.ht/~emersion/go-scfg v0.0.0-20240128091534-2ae16e782082
 require (
 	github.com/MicahParks/keyfunc/v3 v3.3.3
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	gorm.io/driver/sqlite v1.5.6
+	gorm.io/gorm v1.25.11
 )
 
 require (
@@ -16,6 +18,4 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
-	gorm.io/driver/sqlite v1.5.6 // indirect
-	gorm.io/gorm v1.25.11 // indirect
 )
