@@ -22,6 +22,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"net"
@@ -37,11 +38,25 @@ var tmpl *template.Template
 func handle_index(w http.ResponseWriter, req *http.Request) {
 	session_cookie, err := req.Cookie("session")
 	if errors.Is(err, http.ErrNoCookie) {
-		err = tmpl.ExecuteTemplate(w, "index_login", nil)
+		err = tmpl.ExecuteTemplate(
+			w,
+			"index_login",
+			map[string]string{
+				"authUrl": generate_authorization_url(),
+			},
+		)
 		if err != nil {
 			log.Println(err)
 			return
 		}
+		return
+	} else if err != nil {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(400)
+		w.Write([]byte(fmt.Sprintf(
+			"Error\n" +
+				"Unable to check cookie.",
+		)))
 		return
 	}
 	_ = session_cookie
@@ -50,12 +65,6 @@ func handle_index(w http.ResponseWriter, req *http.Request) {
 		log.Println(err)
 		return
 	}
-}
-
-func handle_login(w http.ResponseWriter, req *http.Request) {
-	/* TODO: Invalidate current session */
-	openid_authorization_url := generate_authorization_url()
-	http.Redirect(w, req, openid_authorization_url, 303)
 }
 
 func main() {
@@ -83,7 +92,6 @@ func main() {
 
 	log.Printf("Registering handlers\n")
 	http.HandleFunc("/{$}", handle_index)
-	http.HandleFunc("/login", handle_login)
 	http.HandleFunc("/oidc", handle_oidc)
 
 	log.Printf("Fetching OpenID Connect configuration\n")
