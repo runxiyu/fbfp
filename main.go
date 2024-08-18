@@ -42,10 +42,16 @@ func main() {
 	tmpl, err = template.ParseGlob("tmpl/*")
 	e(err)
 
+	if config.Static {
+		log.Printf("Registering static handle\n")
+		fs := http.FileServer(http.Dir("./static"))
+		http.Handle("/static/", http.StripPrefix("/static/", fs))
+	}
+
 	log.Printf("Registering handlers\n")
 	http.HandleFunc("/{$}", handle_index)
 	http.HandleFunc("/login", handle_login)
-	http.HandleFunc(config.Openid.Redirect, handle_oidc)
+	http.HandleFunc("/oidc", handle_oidc)
 
 	log.Printf(
 		"Establishing listener for net %s, addr %s\n",

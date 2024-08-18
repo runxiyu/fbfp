@@ -91,14 +91,13 @@ func generate_authorization_url() string {
 		"%s"+
 			"?client_id=%s"+
 			"&response_type=id_token"+
-			"&redirect_uri=%s%s"+
+			"&redirect_uri=%s/oidc"+
 			"&response_mode=form_post"+
 			"&scope=openid+profile+email"+
 			"&nonce=%s",
 		openid_configuration.AuthorizationEndpoint,
 		config.Openid.Client,
 		config.Url,
-		config.Openid.Redirect,
 		nonce,
 	)
 }

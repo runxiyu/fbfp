@@ -17,6 +17,7 @@ import (
 
 var config_with_pointers struct {
 	Url    *string `scfg:"url"`
+	Static *bool   `scfg:"static"`
 	Listen struct {
 		Addr  *string `scfg:"addr"`
 		Net   *string `scfg:"net"`
@@ -30,12 +31,12 @@ var config_with_pointers struct {
 		Client    *string `scfg:"client"`
 		Endpoint  *string `scfg:"endpoint"`
 		Authorize *string `scfg:"authorize"`
-		Redirect  *string `scfg:"redirect"`
 	} `scfg:"openid"`
 }
 
 var config struct {
 	Url    string
+	Static bool
 	Listen struct {
 		Addr  string
 		Net   string
@@ -49,7 +50,6 @@ var config struct {
 		Client    string
 		Endpoint  string
 		Authorize string
-		Redirect  string
 	}
 }
 
@@ -65,6 +65,7 @@ func fbfp_get_config(path string) {
 	 * There should be better ways to handle this.
 	 */
 	config.Url = *(config_with_pointers.Url)
+	config.Static = *(config_with_pointers.Static)
 	config.Listen.Addr = *(config_with_pointers.Listen.Addr)
 	config.Listen.Net = *(config_with_pointers.Listen.Net)
 	config.Listen.Proto = *(config_with_pointers.Listen.Proto)
@@ -72,7 +73,6 @@ func fbfp_get_config(path string) {
 	config.Db.Conn = *(config_with_pointers.Db.Conn)
 	config.Openid.Client = *(config_with_pointers.Openid.Client)
 	config.Openid.Endpoint = *(config_with_pointers.Openid.Endpoint)
-	config.Openid.Redirect = *(config_with_pointers.Openid.Redirect)
 
 	if config_with_pointers.Openid.Authorize != nil {
 		config.Openid.Authorize =
