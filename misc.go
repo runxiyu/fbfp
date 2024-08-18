@@ -25,10 +25,17 @@ import (
 	"encoding/base64"
 )
 
-func e(e error) {
-	if e != nil {
-		panic(e)
+func e(err error) {
+	if err != nil {
+		panic(err)
 	}
+}
+
+func er[v_t any](v v_t, err error) v_t {
+	if err != nil {
+		panic(err)
+	}
+	return v
 }
 
 /*

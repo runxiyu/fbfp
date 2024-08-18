@@ -73,8 +73,7 @@ func main() {
 	e(setup_database())
 
 	log.Printf("Setting up templates\n")
-	tmpl, err = template.ParseGlob("tmpl/*")
-	e(err)
+	tmpl = er(template.ParseGlob("tmpl/*"))
 
 	if config.Static {
 		log.Printf("Registering static handle\n")
@@ -95,8 +94,7 @@ func main() {
 		config.Listen.Net,
 		config.Listen.Addr,
 	)
-	l, err := net.Listen(config.Listen.Net, config.Listen.Addr)
-	e(err)
+	l := er(net.Listen(config.Listen.Net, config.Listen.Addr))
 
 	if config.Listen.Proto == "http" {
 		log.Printf("Serving http\n")
