@@ -20,3 +20,9 @@ tab_size                 = 4
 
 [*.tmpl]
 tab_size                 = 4
+
+
+# Note: It is intentional here that JavaScript, HTML, and CSS are indented with
+# tabs. I find the "standards" of indenting with two spaces to be confusing and
+# unreadable, and I would prefer that things stay consistent with the rest of
+# my code base.
