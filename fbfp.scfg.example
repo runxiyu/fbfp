@@ -1,11 +1,16 @@
-proto  "http"
-net    "tcp"
-addr   ":5555"
-url    "http://localhost:5555"
+proto  http
+net    tcp
+addr   :5555
+url    http://localhost:5555
+
+db {
+	type sqlite
+	conn test.db
+}
 
 openid {
-	client    "6d3106e1-a859-4e68-8115-8df599333fc6"
-	endpoint  "https://login.microsoftonline.com/ddd3d26c-b197-4d00-a32d-1ffd84c0c295"
-	authorize "https://login.microsoftonline.com/ddd3d26c-b197-4d00-a32d-1ffd84c0c295/oauth2/v2.0/authorize"
-	redirect  "/oidc"
+	client    6d3106e1-a859-4e68-8115-8df599333fc6
+	endpoint  https://login.microsoftonline.com/ddd3d26c-b197-4d00-a32d-1ffd84c0c295
+	authorize https://login.microsoftonline.com/ddd3d26c-b197-4d00-a32d-1ffd84c0c295/oauth2/v2.0/authorize
+	redirect  /oidc
 }

@@ -16,10 +16,14 @@ import (
  */
 
 var config_with_pointers struct {
-	Addr   *string `scfg:"addr"`
-	Net    *string `scfg:"net"`
-	Proto  *string `scfg:"proto"`
-	Url    *string `scfg:"url"`
+	Addr  *string `scfg:"addr"`
+	Net   *string `scfg:"net"`
+	Proto *string `scfg:"proto"`
+	Url   *string `scfg:"url"`
+	Db    struct {
+		Type *string `scfg:"type"`
+		Conn *string `scfg:"conn"`
+	} `scfg:"db"`
 	Openid struct {
 		Client    *string `scfg:"client"`
 		Endpoint  *string `scfg:"endpoint"`
@@ -29,10 +33,14 @@ var config_with_pointers struct {
 }
 
 var config struct {
-	Addr   string
-	Net    string
-	Proto  string
-	Url    string
+	Addr  string
+	Net   string
+	Proto string
+	Url   string
+	Db    struct {
+		Type string
+		Conn string
+	}
 	Openid struct {
 		Client    string
 		Endpoint  string
@@ -56,6 +64,8 @@ func fbfp_get_config(path string) {
 	config.Net = *(config_with_pointers.Net)
 	config.Proto = *(config_with_pointers.Proto)
 	config.Url = *(config_with_pointers.Url)
+	config.Db.Type = *(config_with_pointers.Db.Type)
+	config.Db.Conn = *(config_with_pointers.Db.Conn)
 	config.Openid.Client = *(config_with_pointers.Openid.Client)
 	config.Openid.Endpoint = *(config_with_pointers.Openid.Endpoint)
 	config.Openid.Redirect = *(config_with_pointers.Openid.Redirect)
