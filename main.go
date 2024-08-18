@@ -73,7 +73,7 @@ func main() {
 	e(setup_database())
 
 	log.Printf("Setting up templates\n")
-	tmpl = er(template.ParseGlob("tmpl/*"))
+	tmpl = er(template.ParseGlob(config.Tmpl + "/*"))
 
 	if config.Static {
 		log.Printf("Registering static handle\n")

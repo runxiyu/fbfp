@@ -2,6 +2,11 @@
 # and some user-accessible URLs.
 url http://localhost
 
+# Where is the tmpl directory? Usually this should be a directory inside
+# the fbfp source directory, though it might exist in /usr/local/share or
+# /usr/share if this ever gets packaged or something.
+tmpl tmpl
+
 # Should we serve /static ourself? This should usually be handled by the
 # upstream Web server such as nginx(8) or OpenBSD httpd(8). However, this might
 # be useful during development or when running behind relayd(8).
