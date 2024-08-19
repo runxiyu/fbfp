@@ -1,4 +1,6 @@
 {{- /*
+     * vim: filetype=gotmpl
+     *
      * Copyright (c) 2024 Runxi Yu
      * SPDX-License-Identifier: AGPL-3.0-or-later
      *
@@ -17,16 +19,31 @@
      */ -}}
 {{- define "index" -}}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<title>
-			Title
+			Home &ndash; FBFP
 		</title>
+		<link rel="stylesheet" href="/static/style.css" />
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	</head>
 	<body>
-		<p>
-			Paragraph
-		</p>
+		<header>
+			<div class="header-content">
+				<div class="header-left">
+					<h1><a id="site-title" href="/">FBFP</a></h1>
+				</div>
+				<div class="header-middle">
+				</div>
+				<div class="header-right">
+					<p>{{- .user.Name -}}</p>
+				</div>
+			</div>
+		</header>
+		<main>
+		e
+		</main>
 	</body>
 </html>
 {{- end -}}

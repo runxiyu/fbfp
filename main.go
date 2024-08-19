@@ -59,8 +59,32 @@ func handle_index(w http.ResponseWriter, req *http.Request) {
 		)))
 		return
 	}
-	_ = session_cookie
-	err = tmpl.ExecuteTemplate(w, "index", nil)
+	var session session_t
+	err = db.First(&session, session_t{Cookie: session_cookie.Value}).Error
+	if err != nil {
+		err = tmpl.ExecuteTemplate(
+			w,
+			"index_login",
+			map[string]interface{}{
+				"authUrl": generate_authorization_url(),
+				"notes":   []string{"Cookie lookup failed. You are now unauthenticated."},
+			},
+		)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		return
+	}
+	fmt.Println(session.User)
+	user := session.User
+	err = tmpl.ExecuteTemplate(
+		w,
+		"index",
+		map[string]interface{}{
+			"user": user,
+		},
+	)
 	if err != nil {
 		log.Println(err)
 		return

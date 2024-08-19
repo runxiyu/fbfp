@@ -246,7 +246,9 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
+	var session session_t
 	var user user_t
+
 	err = db.FirstOrCreate(&user, user_t{Subject: claims.Subject}).Error
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -261,14 +263,12 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	user.Email = claims.Email
 	db.Save(&user)
 
-	w.WriteHeader(200)
-	w.Write([]byte(fmt.Sprintf(
-		"Name: %s\nEmail: %s\nSubject: %s\nCookie: %s\n",
-		claims.Name,
-		claims.Email,
-		claims.Subject,
-		cookie_value,
-	)))
+	session.User = user
+	session.Cookie = cookie_value
+	err = db.Create(&session).Error
+
+	http.Redirect(w, req, "/", 303)
+
 	return
 
 }

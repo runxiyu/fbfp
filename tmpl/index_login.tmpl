@@ -22,7 +22,7 @@
 <html lang="en">
 	<head>
 		<title>
-			Login required &ndash; FBFP
+			Authentication required &ndash; FBFP
 		</title>
 		<link rel="stylesheet" href="/static/style.css" />
 		<meta charset="utf-8" />
@@ -41,12 +41,6 @@
 					<h1><a id="site-title" href="/">FBFP</a></h1>
 				</div>
 				<div class="header-middle">
-					{{- /*
-					<nav>
-						<ul>
-						</ul>
-					</nav>
-					*/ -}}
 				</div>
 				<div class="header-right">
 					<p>Unauthenticated</p>
@@ -54,6 +48,9 @@
 			</div>
 		</header>
 		<main>
+			<p>
+			{{- .notes -}}
+			</p>
 			<div id="login-box">
 				<p>
 					You have not authenticated. You must sign in to use this service.
