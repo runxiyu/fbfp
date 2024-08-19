@@ -58,8 +58,7 @@ type msclaims_t struct {
  * - https://accounts.google.com/.well-known/openid-configuration
  */
 func get_openid_config(endpoint string) {
-	resp, err := http.Get(endpoint + "/.well-known/openid-configuration")
-	e(err)
+	resp := er(http.Get(endpoint + "/.well-known/openid-configuration"))
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		log.Fatal(fmt.Sprintf(
@@ -67,11 +66,9 @@ func get_openid_config(endpoint string) {
 			resp.StatusCode,
 		))
 	}
-	err = json.NewDecoder(resp.Body).Decode(&openid_configuration)
-	e(err)
+	e(json.NewDecoder(resp.Body).Decode(&openid_configuration))
 
-	resp, err = http.Get(openid_configuration.JwksUri)
-	e(err)
+	resp = er(http.Get(openid_configuration.JwksUri))
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		log.Fatal(fmt.Sprintf(
@@ -85,8 +82,7 @@ func get_openid_config(endpoint string) {
 			config.Openid.Authorize
 	}
 
-	jwks_json, err := io.ReadAll(resp.Body)
-	e(err)
+	jwks_json := er(io.ReadAll(resp.Body))
 
 	/*
 	 * TODO: The key set is never updated, which is technically incorrect.
@@ -94,8 +90,7 @@ func get_openid_config(endpoint string) {
 	 * controlling when to do it manually. Remember to wrap it around a
 	 * mutex or some semaphores though.
 	 */
-	openid_keyfunc, err = keyfunc.NewJWKSetJSON(jwks_json)
-	e(err)
+	openid_keyfunc = er(keyfunc.NewJWKSetJSON(jwks_json))
 }
 
 func generate_authorization_url() string {

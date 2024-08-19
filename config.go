@@ -78,11 +78,9 @@ var config struct {
 }
 
 func fbfp_get_config(path string) {
-	f, err := os.Open(path)
-	e(err)
+	f := er(os.Open(path))
 
-	err = scfg.NewDecoder(bufio.NewReader(f)).Decode(&config_with_pointers)
-	e(err)
+	e(scfg.NewDecoder(bufio.NewReader(f)).Decode(&config_with_pointers))
 
 	/*
 	 * TODO: We segfault when there are missing configuration options.
