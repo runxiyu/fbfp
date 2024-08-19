@@ -1,35 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-type user_t struct {
-	Subject  string `gorm:"primaryKey"`
-	Name     string
-	Email    string
-	Sessions []session_t `gorm:"foreignKey:UserSubject"`
-}
-
-type session_t struct {
-	Cookie      string `gorm:"primaryKey"`
-	UserSubject string
-	User        user_t `gorm:"foreignKey:UserSubject"`
-}
+var db *sql.DB
 
 func setup_database() error {
 	var err error
-	switch config.Db.Type {
-	case "sqlite":
-		db, err = gorm.Open(sqlite.Open(config.Db.Conn), &gorm.Config{})
-		if err != nil {
-			return err
-		}
-	default:
-		return (fmt.Errorf("Database type \"%s\" unsupported", config.Db.Type))
+	db, err = sql.Open(config.Db.Type, config.Db.Conn)
+	if err != nil {
+		return err
+	} else {
+		return nil
 	}
-	return db.AutoMigrate(&user_t{}, &session_t{})
 }

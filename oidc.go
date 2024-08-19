@@ -246,26 +246,15 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
-	var session session_t
-	var user user_t
+	result, err := db.Exec(
+		"INSERT INTO users (id, name, email) VALUES (?, ?, ?)",
+		claims.Subject,
+		claims.Name,
+		claims.Email,
+	)
+	// TODO: handle err
 
-	err = db.FirstOrCreate(&user, user_t{Subject: claims.Subject}).Error
-	if err != nil {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.WriteHeader(500)
-		w.Write([]byte(fmt.Sprintf(
-			"Error\nDatabase query failed.\n%s\n",
-			err,
-		)))
-		return
-	}
-	user.Name = claims.Name
-	user.Email = claims.Email
-	db.Save(&user)
-
-	session.User = user
-	session.Cookie = cookie_value
-	err = db.Create(&session).Error
+	fmt.Println(result, err)
 
 	http.Redirect(w, req, "/", 303)
 

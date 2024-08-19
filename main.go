@@ -28,11 +28,8 @@ import (
 	"net"
 	"net/http"
 	"net/http/fcgi"
-
-	"gorm.io/gorm"
 )
 
-var db *gorm.DB
 var tmpl *template.Template
 
 func handle_index(w http.ResponseWriter, req *http.Request) {
@@ -59,36 +56,20 @@ func handle_index(w http.ResponseWriter, req *http.Request) {
 		)))
 		return
 	}
-	var session session_t
-	err = db.First(&session, session_t{Cookie: session_cookie.Value}).Error
-	if err != nil {
-		err = tmpl.ExecuteTemplate(
-			w,
-			"index_login",
-			map[string]interface{}{
-				"authUrl": generate_authorization_url(),
-				"notes":   []string{"Cookie lookup failed. You are now unauthenticated."},
-			},
-		)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		return
-	}
-	fmt.Println(session.User)
-	user := session.User
 	err = tmpl.ExecuteTemplate(
 		w,
 		"index",
 		map[string]interface{}{
-			"user": user,
+			"user": map[string]interface{}{
+				"Name": "NAME",
+			},
 		},
 	)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	_ = session_cookie
 }
 
 func main() {

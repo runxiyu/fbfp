@@ -37,7 +37,7 @@ listen {
 db {
 	# What type of database should we use? Currently, only "sqlite" is
 	# supported.
-	type sqlite
+	type sqlite3
 
 	# What is the connection string to database? For SQLite, this is
 	# simply a path to the database file.
