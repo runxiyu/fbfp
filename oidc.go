@@ -245,6 +245,7 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 		Value:    cookie_value,
 		SameSite: http.SameSiteLaxMode,
 		HttpOnly: true,
+		Secure:   config.Prod,
 	}
 
 	http.SetCookie(w, &cookie)

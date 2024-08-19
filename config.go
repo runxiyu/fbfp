@@ -37,6 +37,7 @@ import (
 
 var config_with_pointers struct {
 	Url    *string `scfg:"url"`
+	Prod   *bool   `scfg:"prod"`
 	Tmpl   *string `scfg:"tmpl"`
 	Static *bool   `scfg:"static"`
 	Listen struct {
@@ -57,6 +58,7 @@ var config_with_pointers struct {
 
 var config struct {
 	Url    string
+	Prod   bool
 	Tmpl   string
 	Static bool
 	Listen struct {
@@ -87,6 +89,7 @@ func fbfp_get_config(path string) {
 	 * There should be better ways to handle this.
 	 */
 	config.Url = *(config_with_pointers.Url)
+	config.Prod = *(config_with_pointers.Prod)
 	config.Tmpl = *(config_with_pointers.Tmpl)
 	config.Static = *(config_with_pointers.Static)
 	config.Listen.Addr = *(config_with_pointers.Listen.Addr)
