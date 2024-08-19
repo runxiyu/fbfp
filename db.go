@@ -1,19 +1,19 @@
 package main
 
 import (
-	"database/sql"
+	"context"
+	"errors"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var db *sql.DB
+var db *pgxpool.Pool
 
 func setup_database() error {
 	var err error
-	db, err = sql.Open(config.Db.Type, config.Db.Conn)
-	if err != nil {
-		return err
-	} else {
-		return nil
+	if config.Db.Type != "postgres" {
+		return errors.New("At the moment, the only supported database type is postgres")
 	}
+	db, err = pgxpool.New(context.Background(), config.Db.Conn)
+	return err
 }

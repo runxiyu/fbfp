@@ -5,7 +5,7 @@ CREATE TABLE users (
 );
 CREATE TABLE sessions (
 	userid TEXT NOT NULL,
-	cookie TEXT,
-	expr INTEGER,
+	cookie TEXT PRIMARY KEY NOT NULL,
+	expr INTEGER NOT NULL,
 	FOREIGN KEY(userid) REFERENCES users(id)
 );

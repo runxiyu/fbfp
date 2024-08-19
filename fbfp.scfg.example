@@ -35,13 +35,13 @@ listen {
 }
 
 db {
-	# What type of database should we use? Currently, only "sqlite" is
+	# What type of database should we use? Currently, only "postgres" is
 	# supported.
-	type sqlite3
+	type postgres
 
-	# What is the connection string to database? For SQLite, this is
-	# simply a path to the database file.
-	conn test.db
+	# What is the connection string to database?
+	# Example: postgresql:///fbfp?host=/var/run/postgresql
+	conn postgresql:///fbfp?host=/var/run/postgresql
 }
 
 openid {

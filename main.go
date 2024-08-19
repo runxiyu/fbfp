@@ -21,8 +21,6 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"html/template"
 	"log"
 	"net"
@@ -31,46 +29,6 @@ import (
 )
 
 var tmpl *template.Template
-
-func handle_index(w http.ResponseWriter, req *http.Request) {
-	session_cookie, err := req.Cookie("session")
-	if errors.Is(err, http.ErrNoCookie) {
-		err = tmpl.ExecuteTemplate(
-			w,
-			"index_login",
-			map[string]string{
-				"authUrl": generate_authorization_url(),
-			},
-		)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		return
-	} else if err != nil {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.WriteHeader(400)
-		w.Write([]byte(fmt.Sprintf(
-			"Error\n" +
-				"Unable to check cookie.",
-		)))
-		return
-	}
-	err = tmpl.ExecuteTemplate(
-		w,
-		"index",
-		map[string]interface{}{
-			"user": map[string]interface{}{
-				"Name": "NAME",
-			},
-		},
-	)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	_ = session_cookie
-}
 
 func main() {
 	/*

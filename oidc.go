@@ -21,6 +21,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,6 +31,7 @@ import (
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 var openid_configuration struct {
@@ -246,15 +248,60 @@ func handle_oidc(w http.ResponseWriter, req *http.Request) {
 	http.SetCookie(w, &cookie)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
-	result, err := db.Exec(
-		"INSERT INTO users (id, name, email) VALUES (?, ?, ?)",
+	_, err = db.Exec(
+		context.Background(),
+		"INSERT INTO users (id, name, email) VALUES ($1, $2, $3)",
 		claims.Subject,
 		claims.Name,
 		claims.Email,
 	)
-	// TODO: handle err
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				_, err := db.Exec(
+					context.Background(),
+					"UPDATE users SET (name, email) = ($1, $2) WHERE id = $3",
+					claims.Name,
+					claims.Email,
+					claims.Subject,
+				)
+				if err != nil {
+					w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+					w.WriteHeader(500)
+					w.Write([]byte(fmt.Sprintf("Error\nDatabase error while updating your account.\n%s\n", err)))
+					return
+				}
+			}
+		} else {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.WriteHeader(500)
+			w.Write([]byte(fmt.Sprintf("Error\nDatabase error while attempting to insert account info.\n%s\n", err)))
+			return
+		}
+	}
 
-	fmt.Println(result, err)
+	_, err = db.Exec(
+		context.Background(),
+		"INSERT INTO sessions(userid, cookie, expr) VALUES ($1, $2, $3)",
+		claims.Subject,
+		cookie_value,
+		1881839332, /* TODO */
+	)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.WriteHeader(500)
+			w.Write([]byte(fmt.Sprintf("Error\nCookie collision! Could you try signing in again?\n%s\n", err)))
+			return
+		} else {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.WriteHeader(500)
+			w.Write([]byte(fmt.Sprintf("Error\nDatabase error while attempting to insert session info.\n%s\n", err)))
+			return
+		}
+	}
 
 	http.Redirect(w, req, "/", 303)
 
