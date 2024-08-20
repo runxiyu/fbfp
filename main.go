@@ -39,7 +39,7 @@ func main() {
 	 */
 	var err error
 
-	fbfp_get_config("fbfp.scfg")
+	e(fbfp_get_config("fbfp.scfg"))
 
 	log.Printf("Setting up database\n")
 	e(setup_database())
@@ -58,7 +58,7 @@ func main() {
 	http.HandleFunc("/oidc", handle_oidc)
 
 	log.Printf("Fetching OpenID Connect configuration\n")
-	get_openid_config(config.Openid.Endpoint)
+	e(get_openid_config(config.Openid.Endpoint))
 
 	log.Printf(
 		"Establishing listener for net \"%s\", addr \"%s\"\n",

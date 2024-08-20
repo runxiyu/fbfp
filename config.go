@@ -77,10 +77,13 @@ var config struct {
 	}
 }
 
-func fbfp_get_config(path string) {
+func fbfp_get_config(path string) error {
 	f := er(os.Open(path))
 
-	e(scfg.NewDecoder(bufio.NewReader(f)).Decode(&config_with_pointers))
+	err := scfg.NewDecoder(bufio.NewReader(f)).Decode(&config_with_pointers)
+	if err != nil {
+		return err
+	}
 
 	/*
 	 * TODO: We segfault when there are missing configuration options.
@@ -102,4 +105,6 @@ func fbfp_get_config(path string) {
 		config.Openid.Authorize =
 			*(config_with_pointers.Openid.Authorize)
 	}
+
+	return nil
 }

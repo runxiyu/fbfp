@@ -26,7 +26,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/MicahParks/keyfunc/v3"
@@ -59,24 +58,29 @@ type msclaims_t struct {
  * - https://login.microsoftonline.com/common
  * - https://accounts.google.com/.well-known/openid-configuration
  */
-func get_openid_config(endpoint string) {
-	resp := er(http.Get(endpoint + "/.well-known/openid-configuration"))
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		log.Fatal(fmt.Sprintf(
-			"Got response code %d from openid-configuration\n",
-			resp.StatusCode,
-		))
+func get_openid_config(endpoint string) error {
+	resp, err := http.Get(endpoint + "/.well-known/openid-configuration")
+	if err != nil {
+		return err
 	}
-	e(json.NewDecoder(resp.Body).Decode(&openid_configuration))
-
-	resp = er(http.Get(openid_configuration.JwksUri))
 	defer resp.Body.Close()
+
 	if resp.StatusCode != 200 {
-		log.Fatal(fmt.Sprintf(
-			"Got response code %d from JwksUri\n",
-			resp.StatusCode,
-		))
+		return errors.New("Got non-200 response code from openid-configuration")
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&openid_configuration); err != nil {
+		return err
+	}
+
+	resp, err = http.Get(openid_configuration.JwksUri)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return errors.New("Got non-200 response code from JwksUri")
 	}
 
 	if config.Openid.Authorize != "" {
@@ -84,7 +88,10 @@ func get_openid_config(endpoint string) {
 			config.Openid.Authorize
 	}
 
-	jwks_json := er(io.ReadAll(resp.Body))
+	jwks_json, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 
 	/*
 	 * TODO: The key set is never updated, which is technically incorrect.
@@ -92,7 +99,12 @@ func get_openid_config(endpoint string) {
 	 * controlling when to do it manually. Remember to wrap it around a
 	 * mutex or some semaphores though.
 	 */
-	openid_keyfunc = er(keyfunc.NewJWKSetJSON(jwks_json))
+	openid_keyfunc, err = keyfunc.NewJWKSetJSON(jwks_json)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func generate_authorization_url() string {
