@@ -93,7 +93,11 @@ func handle_index(w http.ResponseWriter, req *http.Request) {
 		},
 	)
 	if err != nil {
-		log.Println(err)
-		return
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(500)
+		w.Write([]byte(fmt.Sprintf(
+			"Error\nUnexpected template error.\n%s\n",
+			err,
+		)))
 	}
 }

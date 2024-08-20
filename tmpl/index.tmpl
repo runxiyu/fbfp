@@ -68,25 +68,22 @@
 						<tr>
 							<th colspan=3>Your Works</th>
 						</tr>
-						{{- /* TODO: It's better to use a caption but it's too hard to get the formatting right */ -}}
 						<tr>
 							<th class="min" scope="col">ID</th>
 							<th class="min" scope="col">Flags</th>
 							<th scope="col">Title</th>
 						</tr>
-						{{- /*
-						{% for w in wyours %}
+						{{- range .works }}
 						<tr>
-							<th scope="row" class="min">{{ w.id }}</th>
-							<td class="min flags">{%if w.public%}<abbr title="Public">P</abbr>{%else%}<abbr title="Private">x</abbr>{%endif%}{%if w.active%}<abbr title="Active">!</abbr>{%else%}<abbr title="Inactive">-</abbr>{%endif%}{%if w.anonymous%}<abbr title="Anonymous">*</abbr>{%else%}<abbr title="Non-anonymous"</abbr>@</abbr>{%endif%}</td>
-							<td><a href="{{ url_for(".work", id=w.id) }}">{{ w.title }}</a></td>
+							<th scope="row" class="min">{{ .id }}</th>
+							<td class="min flags">{{- if .public -}}<abbr title="Public">P</abbr>{{- else -}}<abbr title="Private">x</abbr>{{- end -}}{{- if .active -}}<abbr title="Active">!</abbr>{{- else -}}<abbr title="Inactive">-</abbr>{{- end -}}{{- if .anonymous -}}<abbr title="Anonymous">*</abbr>{{- else -}}<abbr title="Non-anonymous">@</abbr>{{- end -}}</td>
+							<td><a href="./works/{{- .id -}}">{{- .title -}}</a></td>
 						</tr>
-						{% endfor %}
-						*/ -}}
+						{{ end -}}
 						<tr>
 							<th colspan="3">
 								<div class="flex-justify">
-									<a class="btn-primary btn" href="{{- /* url_for(".new") */ -}}">New</a>
+									<a class="btn-primary btn" href="./works/new">New</a>
 								</div>
 							</th>
 						</tr>
